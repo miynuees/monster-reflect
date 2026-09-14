@@ -24,6 +24,8 @@
   --violet-3:#F1E9FF;
   --yellow:#FFC93C;
   --yellow-3:#FFF6DC;
+  --pink-3:#FFE9F2;
+  --pink-dark:#C2557F;
   --ink:#2B2140;
   --sub:#6E6482;
   --line:#E3DEF7;
@@ -162,6 +164,12 @@ button,input{font-family:inherit}
 }
 .ans-card .a{font-size:12.5px;line-height:1.7;white-space:pre-wrap;font-weight:500}
 .ans-card .a.blank{color:var(--sub)}
+.ans-card .a + .sub-h{margin-top:8px}
+.ans-card .sub-h{font-size:11px;font-weight:800;color:var(--sub);margin-bottom:3px;line-height:1.5}
+.ans-card .sub-h.ai{color:var(--mint-dark)}
+.ans-card .sub-h.me{color:var(--pink-dark)}
+.ans-card .a.sent{font-weight:700}
+.ans-card .a.sent b{color:var(--violet-dark);border-bottom:2px solid var(--violet-2);padding:0 5px}
 
 .empty{
   text-align:center;color:var(--sub);font-size:13px;font-weight:600;
@@ -200,6 +208,12 @@ button,input{font-family:inherit}
 .pdf-ans .qh{font-size:12.5px;font-weight:800;color:#7440E0;margin-bottom:6px;line-height:1.6}
 .pdf-ans .word{display:inline-block;background:#F1E9FF;border:2px solid #2B2140;border-radius:99px;padding:2px 12px;font-size:12.5px;font-weight:800;color:#7440E0;margin-bottom:7px}
 .pdf-ans .a{font-size:12.5px;line-height:1.75;white-space:pre-wrap;font-weight:500}
+.pdf-ans .a + .sub-h{margin-top:9px}
+.pdf-ans .sub-h{font-size:11.5px;font-weight:800;color:#6E6482;margin-bottom:3px;line-height:1.5}
+.pdf-ans .sub-h.ai{color:#0EA790}
+.pdf-ans .sub-h.me{color:#C2557F}
+.pdf-ans .a.sent{font-weight:700}
+.pdf-ans .a.sent b{color:#7440E0;border-bottom:2px solid #DCCBFA;padding:0 5px}
 .pdf-empty{text-align:center;color:#6E6482;font-size:13px;font-weight:600;padding:22px;border:2px dashed #2B2140;border-radius:14px}
 </style>
 </head>
@@ -257,34 +271,88 @@ button,input{font-family:inherit}
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 /* ⚠️ 아래 QUESTIONS는 학생 페이지(index.html)의 QUESTIONS와 똑같이 맞춰주세요.
-   질문을 바꿀 때는 두 파일 모두 고쳐야 합니다. */
+   질문을 바꿀 때는 두 파일을 함께 고쳐야 합니다. */
+/* ════════════════════════════════════════════════════════════════
+   성찰 질문 — 종이 활동지 "⑥ 활동 성찰"을 그대로 옮긴 것.
+   여기만 고치면 학생 화면·제출 결과·PDF가 함께 바뀝니다.
+   (teacher.html 위쪽에도 똑같은 QUESTIONS가 있으니 함께 고칠 것)
+
+   한 질문(카드) = {icon, title, hint, cols, fields[] 또는 sentence[]}
+     icon   : 앞에 붙는 그림문자
+     title  : 질문 (굵게 나오는 줄)
+     hint   : 아래 작은 안내 (필요 없으면 없애도 됨)
+     cols   : 2를 주면 칸이 좌우 두 줄로 놓임 (활동지의 AI칸/나칸 대비)
+     fields : 답 칸 목록. {key, label, tone:'ai'|'me', ph}
+              key는 저장에 쓰는 이름 — 수업에 한번 쓴 뒤에는 바꾸지 말 것
+     sentence : 빈칸 채우기 한 문장. 글자는 {t:'...'}, 빈칸은 {key:'...', w:'short'|'long'}
+   ════════════════════════════════════════════════════════════════ */
 const QUESTIONS = [
   {
-    key: 'change', icon: '🔄',
-    title: '처음 구상한 설정과 최종 작품, 무엇이 달라졌나요?',
-    hint: '달라진 부분과, 왜 그렇게 바꿨는지 함께 적어주세요.',
-    ph: '',
+    icon: '🌍',
+    title: '내가 기획한 세계관이 결과물(최종 작품)에 잘 반영된 것 같나요?',
+    hint: '잘 반영된 부분과 잘 반영되지 않은 부분을 함께 적어주세요.',
+    fields: [{key: 'worldview', ph: '예: 급식실에 산다는 설정은 배경까지 잘 나왔는데, 겁이 많다는 성격은 잘 안 보여요'}]
   },
   {
-    key: 'filled', icon: '✍️',
-    title: 'AI가 그려주지 못해서 내가 직접 채운 부분은 무엇인가요?',
-    hint: '',
-    ph: '',
+    icon: '🔄',
+    title: '아이디어 스케치와 최종 작품은 어떤 부분이 가장 크게 달라졌나요?',
+    hint: '무슨 단계에서 내 작품의 가장 큰 변화가 생겨났는지도 적어주세요.',
+    fields: [{key: 'change', ph: '예: 등에 있던 가시가 짧아졌어요. 2차 소환에서 고칠 점을 적었을 때 가장 크게 바뀌었어요'}]
   },
   {
-    key: 'roles', icon: '🤝',
-    title: '이번 활동에서 AI가 한 일과 내가 한 일을 나눠 적어보세요.',
-    hint: '',
-    ph: '',
+    icon: '🤝',
+    title: 'AI가 그린 것과 내가 한 일',
+    hint: '최종 작품을 기준으로 나눠 적어주세요.',
+    cols: 2,
+    fields: [
+      {key: 'ai_kept',  tone: 'ai', label: '최종 작품에서 AI 이미지를 그대로 받아들인 부분은?'},
+      {key: 'my_work',  tone: 'me', label: '이 작품을 제작할 때 ‘내가 한 일’은?'}
+    ]
   },
   {
-    key: 'metaphor', icon: '💡',
-    title: '나에게 AI는 어떤 존재인가요?',
+    icon: '⭐',
+    title: '잘한 부분, 그리고 다음에 하고 싶은 것',
     hint: '',
-    ph: '',
-    blank: {before: '나에게 AI는', after: '같은 존재이다.'}
+    cols: 2,
+    fields: [
+      {key: 'ai_good',  tone: 'ai', label: 'AI가 잘 한 부분'},
+      {key: 'me_good',  tone: 'me', label: '내가 잘 한 부분'},
+      {key: 'ai_next',  tone: 'ai', label: '다음에도 AI에게 맡기고 싶은 것'},
+      {key: 'me_next',  tone: 'me', label: '다음 작품을 만들 때 내가 직접 해보고 싶은 것'}
+    ]
+  },
+  {
+    icon: '✍️',
+    title: '최종 작품의 ‘작가’란에 이름을 쓴다면 내 이름만 쓸 건가요, AI도 같이 쓸 건가요?',
+    hint: '그렇게 정한 이유도 적어주세요.',
+    fields: [{key: 'author', ph: ''}]
+  },
+  {
+    icon: '🔍',
+    title: '수업을 처음 시작할 때와 지금, AI에 대한 내 생각은 어떻게 달라졌나요?',
+    hint: '',
+    fields: [{key: 'mindchange', ph: ''}]
+  },
+  {
+    icon: '🖼️',
+    title: 'AI와 함께 창작하더라도 ‘나의 작품’이라고 느끼기 위해 가장 중요하다고 생각하는 것은 무엇인가요?',
+    hint: '',
+    fields: [{key: 'ownership', ph: ''}]
+  },
+  {
+    icon: '💡',
+    title: '한 문장으로 정리하기',
+    hint: '',
+    sentence: [
+      {t: '"나에게 AI란'},
+      {key: 'ai_is', w: 'short'},
+      {t: '이다. 왜냐하면'},
+      {key: 'ai_why', w: 'long'},
+      {t: '."'}
+    ]
   },
 ];
+/* ════════════════════════════════════════════════════════════════ */
 
 const PASSWORD = '0615';
 const CLASS_LABELS = {1:'A반', 2:'E반'};
@@ -395,9 +463,20 @@ async function loadAll(){
 }
 
 function answersOf(s){ return (s.ref && s.ref.answers) || {}; }
+function fieldsOf(q){
+  if(q.fields) return q.fields;
+  if(q.sentence) return q.sentence.filter(function(x){ return x.key; });
+  return [];
+}
+function allFields(){
+  const out = [];
+  QUESTIONS.forEach(function(q){ fieldsOf(q).forEach(function(f){ out.push(f); }); });
+  return out;
+}
+const TOTAL_FIELDS = allFields().length;
 function filledOf(s){
   const a = answersOf(s);
-  return QUESTIONS.filter(q=> (a[q.key] || '').trim()).length;
+  return allFields().filter(function(f){ return (a[f.key] || '').trim(); }).length;
 }
 function stateOf(s){
   if(s.ref && s.ref.submittedAt) return 'done';
@@ -414,7 +493,7 @@ function whoLabel(s){
 function stateBadge(s){
   const st = stateOf(s);
   if(st === 'done') return '<span class="badge done">제출 완료</span>';
-  if(st === 'doing') return '<span class="badge doing">쓰는 중 ' + filledOf(s) + '/' + QUESTIONS.length + '</span>';
+  if(st === 'doing') return '<span class="badge doing">쓰는 중 ' + filledOf(s) + '/' + TOTAL_FIELDS + '</span>';
   return '<span class="badge none">아직 안 씀</span>';
 }
 function classBadge(id){
@@ -498,15 +577,26 @@ function toggleDetail(id){
   fillDetail(id);
 }
 
+function answerBody(q, a){
+  if(q.sentence){
+    return '<div class="a sent">' + q.sentence.map(function(part){
+      if(!part.key) return escapeHTML(part.t);
+      const v = (a[part.key] || '').trim();
+      return '<b>' + (v ? escapeHTML(v) : '______') + '</b>';
+    }).join('') + '</div>';
+  }
+  return fieldsOf(q).map(function(f){
+    const v = (a[f.key] || '').trim();
+    return (f.label ? '<div class="sub-h' + (f.tone ? ' ' + f.tone : '') + '">' + escapeHTML(f.label) + '</div>' : '') +
+      '<div class="a' + (v ? '' : ' blank') + '">' + (v ? escapeHTML(v) : '(빈칸)') + '</div>';
+  }).join('');
+}
 function answerCards(s, cls){
   const a = answersOf(s);
-  return QUESTIONS.map((q, i)=>{
-    const txt = (a[q.key] || '').trim();
-    const w = (a[q.key + '_word'] || '').trim();
+  return QUESTIONS.map(function(q, i){
     return '<div class="' + cls + '">' +
       '<div class="qh">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
-      (q.blank && w ? '<div class="word">' + escapeHTML(q.blank.before) + ' ' + escapeHTML(w) + ' ' + escapeHTML(q.blank.after) + '</div><br>' : '') +
-      '<div class="a' + (txt ? '' : ' blank') + '">' + (txt ? escapeHTML(txt) : '(빈칸)') + '</div>' +
+      answerBody(q, a) +
     '</div>';
   }).join('');
 }
@@ -601,13 +691,10 @@ async function buildBlocks(id){
     blocks.push('<div class="pdf-empty">아직 이 학생이 쓴 성찰이 없어요.</div>');
   }else{
     const a = answersOf(s);
-    QUESTIONS.forEach((q, i)=>{
-      const txt = (a[q.key] || '').trim();
-      const w = (a[q.key + '_word'] || '').trim();
+    QUESTIONS.forEach(function(q, i){
       blocks.push('<div class="pdf-ans">' +
         '<div class="qh">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
-        (q.blank && w ? '<div class="word">' + escapeHTML(q.blank.before) + ' ' + escapeHTML(w) + ' ' + escapeHTML(q.blank.after) + '</div><br>' : '') +
-        '<div class="a">' + (txt ? escapeHTML(txt) : '(빈칸)') + '</div>' +
+        answerBody(q, a) +
       '</div>');
     });
   }

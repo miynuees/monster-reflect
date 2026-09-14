@@ -24,6 +24,8 @@
   --violet-3:#F1E9FF;
   --yellow:#FFC93C;
   --yellow-3:#FFF6DC;
+  --pink-3:#FFE9F2;
+  --pink-dark:#C2557F;
   --ink:#2B2140;
   --sub:#6E6482;
   --line:#E3DEF7;
@@ -109,16 +111,34 @@ button,input,textarea{font-family:inherit}
   resize:vertical;line-height:1.6;min-height:82px;
 }
 .q-card textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
-.blank-row{
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  background:var(--violet-3);border:2px dashed var(--ink);border-radius:12px;
-  padding:11px 13px;margin-bottom:10px;font-size:15px;font-weight:700;
+/* 답 칸: 한 질문 안에 칸이 여러 개일 수 있음 (활동지의 AI칸/나칸 좌우 대비) */
+.f-grid{display:grid;gap:10px}
+.f-grid.cols2{grid-template-columns:1fr 1fr}
+.f-item.tone{border:2px solid var(--ink);border-radius:12px;padding:10px 11px}
+/* 좌우 칸의 입력창 바닥을 맞춤 (라벨 줄 수가 달라도) */
+.f-grid.cols2 .f-item{display:flex;flex-direction:column}
+.f-grid.cols2 .f-item textarea{flex:1}
+.f-item.ai{background:var(--mint-3)}
+.f-item.me{background:var(--pink-3)}
+.f-item label{display:block;font-size:12.5px;font-weight:800;margin-bottom:6px;line-height:1.5}
+.f-item.ai label{color:var(--mint-dark)}
+.f-item.me label{color:var(--pink-dark)}
+.f-item.tone textarea{min-height:66px}
+
+/* 마지막 한 문장 채우기 */
+.sentence{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  background:linear-gradient(100deg,var(--yellow-3) 0%,var(--violet-3) 100%);
+  border:2px dashed var(--ink);border-radius:14px;padding:14px 15px;
+  font-size:15px;font-weight:700;line-height:2.1;
 }
-.blank-row input{
-  flex:1;min-width:120px;border:none;border-bottom:2.5px solid var(--ink);background:transparent;
-  font-size:16px;font-weight:800;color:var(--violet-dark);padding:4px 6px;text-align:center;
+.sentence input{
+  border:none;border-bottom:2.5px solid var(--ink);background:transparent;
+  font-size:15px;font-weight:800;color:var(--violet-dark);padding:4px 8px;text-align:center;
 }
-.blank-row input:focus{outline:none;background:#fff;border-radius:8px 8px 0 0}
+.sentence input.short{flex:0 1 170px;min-width:120px}
+.sentence input.long{flex:1 1 260px;min-width:160px}
+.sentence input:focus{outline:none;background:#fff;border-radius:8px 8px 0 0}
 
 .btn-main{
   width:100%;margin-top:6px;border:2.5px solid var(--ink);border-radius:99px;
@@ -157,6 +177,10 @@ button,input,textarea{font-family:inherit}
 .ans-block .h{font-size:12.5px;font-weight:800;color:var(--violet-dark);margin-bottom:5px;line-height:1.6}
 .ans-block .a{font-size:13.5px;line-height:1.75;white-space:pre-wrap;font-weight:500}
 .ans-block .a.blank{color:var(--sub)}
+.ans-block .a + .sub-h{margin-top:9px}
+.ans-block .sub-h{font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:3px;line-height:1.5}
+.ans-block .a.sent{font-weight:700}
+.ans-block .a.sent b{color:var(--violet-dark);border-bottom:2px solid var(--violet-2);padding:0 5px}
 .ans-block .word{
   display:inline-block;background:var(--violet-3);border:2px solid var(--ink);border-radius:99px;
   padding:3px 12px;font-weight:800;color:var(--violet-dark);margin-bottom:7px;font-size:13px;
@@ -177,6 +201,11 @@ button,input,textarea{font-family:inherit}
   max-width:88vw;text-align:center;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:600px){
+  .f-grid.cols2{grid-template-columns:1fr}
+  .sentence{line-height:1.9}
+}
 </style>
 </head>
 <body>
@@ -253,39 +282,83 @@ button,input,textarea{font-family:inherit}
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 /* ════════════════════════════════════════════════════════════════
-   성찰 질문 — 여기만 고치면 학생 화면과 선생님 페이지가 함께 바뀝니다
-   key   : 저장에 쓰는 이름 (영문. 수업에 한번 쓴 뒤에는 바꾸지 말 것)
-   icon  : 앞에 붙는 그림문자
-   title : 질문 (굵게 나오는 줄)
-   hint  : 아래 작은 안내 (필요 없으면 '')
-   ph    : 입력칸에 흐리게 보이는 예시
-   blank : {before, after} 를 넣으면 빈칸 채우기 한 줄이 위에 생김 (없으면 생략)
+   성찰 질문 — 종이 활동지 "⑥ 활동 성찰"을 그대로 옮긴 것.
+   여기만 고치면 학생 화면·제출 결과·PDF가 함께 바뀝니다.
+   (teacher.html 위쪽에도 똑같은 QUESTIONS가 있으니 함께 고칠 것)
+
+   한 질문(카드) = {icon, title, hint, cols, fields[] 또는 sentence[]}
+     icon   : 앞에 붙는 그림문자
+     title  : 질문 (굵게 나오는 줄)
+     hint   : 아래 작은 안내 (필요 없으면 없애도 됨)
+     cols   : 2를 주면 칸이 좌우 두 줄로 놓임 (활동지의 AI칸/나칸 대비)
+     fields : 답 칸 목록. {key, label, tone:'ai'|'me', ph}
+              key는 저장에 쓰는 이름 — 수업에 한번 쓴 뒤에는 바꾸지 말 것
+     sentence : 빈칸 채우기 한 문장. 글자는 {t:'...'}, 빈칸은 {key:'...', w:'short'|'long'}
    ════════════════════════════════════════════════════════════════ */
 const QUESTIONS = [
   {
-    key: 'change', icon: '🔄',
-    title: '처음 구상한 설정과 최종 작품, 무엇이 달라졌나요?',
-    hint: '달라진 부분과, 왜 그렇게 바꿨는지 함께 적어주세요.',
-    ph: '예: 처음엔 등에 가시가 잔뜩 난 모습이었는데, 겁이 많은 성격이 더 잘 보이도록 몸을 웅크린 모습으로 바꿨어요'
+    icon: '🌍',
+    title: '내가 기획한 세계관이 결과물(최종 작품)에 잘 반영된 것 같나요?',
+    hint: '잘 반영된 부분과 잘 반영되지 않은 부분을 함께 적어주세요.',
+    fields: [{key: 'worldview', ph: '예: 급식실에 산다는 설정은 배경까지 잘 나왔는데, 겁이 많다는 성격은 잘 안 보여요'}]
   },
   {
-    key: 'filled', icon: '✍️',
-    title: 'AI가 그려주지 못해서 내가 직접 채운 부분은 무엇인가요?',
+    icon: '🔄',
+    title: '아이디어 스케치와 최종 작품은 어떤 부분이 가장 크게 달라졌나요?',
+    hint: '무슨 단계에서 내 작품의 가장 큰 변화가 생겨났는지도 적어주세요.',
+    fields: [{key: 'change', ph: '예: 등에 있던 가시가 짧아졌어요. 2차 소환에서 고칠 점을 적었을 때 가장 크게 바뀌었어요'}]
+  },
+  {
+    icon: '🤝',
+    title: 'AI가 그린 것과 내가 한 일',
+    hint: '최종 작품을 기준으로 나눠 적어주세요.',
+    cols: 2,
+    fields: [
+      {key: 'ai_kept',  tone: 'ai', label: '최종 작품에서 AI 이미지를 그대로 받아들인 부분은?'},
+      {key: 'my_work',  tone: 'me', label: '이 작품을 제작할 때 ‘내가 한 일’은?'}
+    ]
+  },
+  {
+    icon: '⭐',
+    title: '잘한 부분, 그리고 다음에 하고 싶은 것',
     hint: '',
-    ph: '예: 급식 냄새를 맡을 때의 표정은 아무리 설명해도 안 나와서 마지막에 직접 그렸어요'
+    cols: 2,
+    fields: [
+      {key: 'ai_good',  tone: 'ai', label: 'AI가 잘 한 부분'},
+      {key: 'me_good',  tone: 'me', label: '내가 잘 한 부분'},
+      {key: 'ai_next',  tone: 'ai', label: '다음에도 AI에게 맡기고 싶은 것'},
+      {key: 'me_next',  tone: 'me', label: '다음 작품을 만들 때 내가 직접 해보고 싶은 것'}
+    ]
   },
   {
-    key: 'roles', icon: '🤝',
-    title: '이번 활동에서 AI가 한 일과 내가 한 일을 나눠 적어보세요.',
+    icon: '✍️',
+    title: '최종 작품의 ‘작가’란에 이름을 쓴다면 내 이름만 쓸 건가요, AI도 같이 쓸 건가요?',
+    hint: '그렇게 정한 이유도 적어주세요.',
+    fields: [{key: 'author', ph: ''}]
+  },
+  {
+    icon: '🔍',
+    title: '수업을 처음 시작할 때와 지금, AI에 대한 내 생각은 어떻게 달라졌나요?',
     hint: '',
-    ph: '예: AI는 —, 나는 —'
+    fields: [{key: 'mindchange', ph: ''}]
   },
   {
-    key: 'metaphor', icon: '💡',
-    title: '나에게 AI는 어떤 존재인가요?',
-    hint: '빈칸을 채우고, 그렇게 생각한 이유를 적어주세요.',
-    ph: '예: 말한 대로 빠르게 그려주지만, 무엇을 그릴지는 정해주지 않기 때문이에요',
-    blank: {before: '나에게 AI는', after: '같은 존재이다.'}
+    icon: '🖼️',
+    title: 'AI와 함께 창작하더라도 ‘나의 작품’이라고 느끼기 위해 가장 중요하다고 생각하는 것은 무엇인가요?',
+    hint: '',
+    fields: [{key: 'ownership', ph: ''}]
+  },
+  {
+    icon: '💡',
+    title: '한 문장으로 정리하기',
+    hint: '',
+    sentence: [
+      {t: '"나에게 AI란'},
+      {key: 'ai_is', w: 'short'},
+      {t: '이다. 왜냐하면'},
+      {key: 'ai_why', w: 'long'},
+      {t: '."'}
+    ]
   },
 ];
 /* ════════════════════════════════════════════════════════════════ */
@@ -430,39 +503,60 @@ async function loadMyMonster(){
 }
 
 /* ── 질문 그리기 ── */
+function fieldsOf(q){
+  if(q.fields) return q.fields;
+  if(q.sentence) return q.sentence.filter(function(x){ return x.key; });
+  return [];
+}
+/* 모든 답 칸을 한 줄로 펼친 목록: [{f: 칸, qIndex: 몇 번째 질문인지}] */
+function allFields(){
+  const out = [];
+  QUESTIONS.forEach(function(q, i){
+    fieldsOf(q).forEach(function(f){ out.push({f: f, qIndex: i}); });
+  });
+  return out;
+}
 function renderQuestions(){
-  $('qBody').innerHTML = QUESTIONS.map((q, i)=>
-    '<div class="q-card">' +
+  $('qBody').innerHTML = QUESTIONS.map(function(q, i){
+    let body;
+    if(q.sentence){
+      body = '<div class="sentence">' + q.sentence.map(function(part){
+        return part.key
+          ? '<input type="text" id="ans-' + part.key + '" class="' + (part.w || 'short') + '" value="' + escapeHTML(answers[part.key] || '') + '">'
+          : '<span>' + escapeHTML(part.t) + '</span>';
+      }).join('') + '</div>';
+    }else{
+      body = '<div class="f-grid' + (q.cols === 2 ? ' cols2' : '') + '">' +
+        fieldsOf(q).map(function(f){
+          return '<div class="f-item' + (f.tone ? ' tone ' + f.tone : '') + '">' +
+            (f.label ? '<label for="ans-' + f.key + '">' + escapeHTML(f.label) + '</label>' : '') +
+            '<textarea id="ans-' + f.key + '" placeholder="' + escapeHTML(f.ph || '') + '">' + escapeHTML(answers[f.key] || '') + '</textarea>' +
+          '</div>';
+        }).join('') + '</div>';
+    }
+    return '<div class="q-card">' +
       '<span class="q-num">' + q.icon + ' 질문 ' + (i + 1) + '</span>' +
       '<p class="q-title">' + escapeHTML(q.title) + '</p>' +
       (q.hint ? '<p class="q-hint">' + escapeHTML(q.hint) + '</p>' : '') +
-      (q.blank ?
-        '<div class="blank-row">' +
-          '<span>' + escapeHTML(q.blank.before) + '</span>' +
-          '<input type="text" id="word-' + q.key + '" placeholder="______" value="' + escapeHTML(answers[q.key + '_word'] || '') + '">' +
-          '<span>' + escapeHTML(q.blank.after) + '</span>' +
-        '</div>' : '') +
-      '<textarea id="ans-' + q.key + '" placeholder="' + escapeHTML(q.ph || '') + '">' + escapeHTML(answers[q.key] || '') + '</textarea>' +
-    '</div>').join('');
+      body +
+    '</div>';
+  }).join('');
 
-  QUESTIONS.forEach(q=>{
-    $('ans-' + q.key).addEventListener('input', onInput);
-    if(q.blank) $('word-' + q.key).addEventListener('input', onInput);
+  allFields().forEach(function(item){
+    const el = $('ans-' + item.f.key);
+    if(el) el.addEventListener('input', onInput);
   });
 }
 function collect(){
-  QUESTIONS.forEach(q=>{
-    const t = $('ans-' + q.key);
-    if(t) answers[q.key] = t.value;
-    if(q.blank){
-      const w = $('word-' + q.key);
-      if(w) answers[q.key + '_word'] = w.value;
-    }
+  allFields().forEach(function(item){
+    const el = $('ans-' + item.f.key);
+    if(el) answers[item.f.key] = el.value;
   });
 }
 function filledCount(){
-  return QUESTIONS.filter(q=> (answers[q.key] || '').trim()).length;
+  return allFields().filter(function(item){ return (answers[item.f.key] || '').trim(); }).length;
 }
+function totalCount(){ return allFields().length; }
 
 /* ── 자동 저장: 3초 쉬면 서버로 ── */
 let saveTimer = null;
@@ -487,7 +581,7 @@ async function pushCloud(isSubmit){
     studentName: myName,
     answers: answers,
     filled: filledCount(),
-    total: QUESTIONS.length,
+    total: totalCount(),
     updatedAt: Date.now()
   };
   if(isSubmit){
@@ -511,12 +605,15 @@ async function pushCloud(isSubmit){
 /* ── 제출 ── */
 $('submitBtn').addEventListener('click', async ()=>{
   collect();
-  const empty = QUESTIONS.filter(q=> !(answers[q.key] || '').trim());
-  if(empty.length){
+  const missing = allFields().filter(function(item){ return !(answers[item.f.key] || '').trim(); });
+  if(missing.length){
     const nums = [];
-    QUESTIONS.forEach((q, i)=>{ if(!(answers[q.key] || '').trim()) nums.push(i + 1); });
+    missing.forEach(function(item){
+      const n = item.qIndex + 1;
+      if(nums.indexOf(n) < 0) nums.push(n);
+    });
     toast(nums.join(', ') + '번 질문이 아직 비어 있어요');
-    const first = $('ans-' + empty[0].key);
+    const first = $('ans-' + missing[0].f.key);
     if(first){ first.focus(); first.scrollIntoView({block:'center', behavior:'smooth'}); }
     return;
   }
@@ -535,15 +632,26 @@ $('editBtn').addEventListener('click', ()=>{
   goTo('write');
 });
 
+function answerHTML(q){
+  if(q.sentence){
+    return '<div class="a sent">' + q.sentence.map(function(part){
+      if(!part.key) return escapeHTML(part.t);
+      const v = (answers[part.key] || '').trim();
+      return '<b>' + (v ? escapeHTML(v) : '______') + '</b>';
+    }).join('') + '</div>';
+  }
+  return fieldsOf(q).map(function(f){
+    const v = (answers[f.key] || '').trim();
+    return (f.label ? '<div class="sub-h">' + escapeHTML(f.label) + '</div>' : '') +
+      '<div class="a' + (v ? '' : ' blank') + '">' + (v ? escapeHTML(v) : '(빈칸)') + '</div>';
+  }).join('');
+}
 function showDone(){
   $('doneWhen').textContent = submittedAt ? '제출 시각 · ' + fmtTime(submittedAt) : '';
-  $('doneBody').innerHTML = QUESTIONS.map((q, i)=>{
-    const a = (answers[q.key] || '').trim();
-    const w = (answers[q.key + '_word'] || '').trim();
+  $('doneBody').innerHTML = QUESTIONS.map(function(q, i){
     return '<div class="ans-block">' +
       '<div class="h">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
-      (q.blank && w ? '<div class="word">' + escapeHTML(q.blank.before) + ' ' + escapeHTML(w) + ' ' + escapeHTML(q.blank.after) + '</div><br>' : '') +
-      '<div class="a' + (a ? '' : ' blank') + '">' + (a ? escapeHTML(a) : '(빈칸)') + '</div>' +
+      answerHTML(q) +
     '</div>';
   }).join('');
   goTo('done');
