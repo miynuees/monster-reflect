@@ -84,14 +84,20 @@ button,input,textarea{font-family:inherit}
 .card .desc{color:var(--sub);font-size:12.5px;margin:0 0 16px;line-height:1.7;font-weight:500}
 
 /* 내 몬스터 미리보기 */
-.mine-box{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.mine-box img{
-  width:104px;height:104px;flex:none;object-fit:cover;
+.mine-head .nm{font-family:'Black Han Sans',sans-serif;font-size:22px;line-height:1.2;margin-bottom:5px}
+.mine-head .note{font-size:12.5px;color:var(--sub);font-weight:500;line-height:1.7;margin-bottom:14px}
+.mine-head .note b{color:var(--ink)}
+.mine-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,175px));gap:12px;justify-content:start}
+.mine-shot{margin:0;text-align:center}
+.mine-shot img{
+  width:100%;aspect-ratio:1/1;object-fit:cover;display:block;
   border-radius:14px;border:2.5px solid var(--ink);background:#fff;box-shadow:var(--shadow-sm);
 }
-.mine-box .info{flex:1;min-width:180px}
-.mine-box .info .nm{font-family:'Black Han Sans',sans-serif;font-size:22px;line-height:1.2;margin-bottom:4px}
-.mine-box .info .note{font-size:12px;color:var(--sub);font-weight:500;line-height:1.6}
+.mine-shot figcaption{
+  display:inline-block;margin-top:8px;background:var(--mint-3);border:2px solid var(--ink);
+  border-radius:99px;padding:3px 11px;font-size:11px;font-weight:800;color:var(--mint-dark);
+}
+.mine-shot.last figcaption{background:var(--violet-3);color:var(--violet-dark)}
 
 /* 질문 카드 */
 .q-card{
@@ -244,13 +250,11 @@ button,input,textarea{font-family:inherit}
   <!-- 작성 -->
   <section class="screen" id="screen-write">
     <div class="card" id="mineCard" style="display:none">
-      <div class="mine-box">
-        <img id="mineImage" alt="내가 소환한 생명체">
-        <div class="info">
-          <div class="nm" id="mineName">내 몬스터</div>
-          <div class="note">내가 만든 생명체를 보면서 아래 질문에 답해보세요.</div>
-        </div>
+      <div class="mine-head">
+        <div class="nm" id="mineName">내 몬스터</div>
+        <div class="note">AI로 소환했던 그림들이에요. 여기까지 어떻게 달라졌는지 살펴보고,<br><b>여러분이 직접 그린 최종 작품</b>을 보면서 아래 질문에 답해주세요.</div>
       </div>
+      <div class="mine-row" id="mineRow"></div>
     </div>
 
     <div id="qBody"></div>
@@ -483,6 +487,11 @@ async function login(auto){
 }
 
 /* ── 내 몬스터 그림: 몬스터 도감 기록에서 가져와 보여줌 ── */
+function stageLabel(i, total){
+  if(i === 0) return '1차 소환';
+  if(i === total - 1) return '정식 소환';
+  return (i + 1) + '차 소환';
+}
 async function loadMyMonster(){
   try{
     const snap = await db.collection('monsterDex').doc(myKey).get();
@@ -490,15 +499,25 @@ async function loadMyMonster(){
     const d = snap.data() || {};
     const stages = d.stages || [];
     if(!stages.length) return;
-    const idx = stages.length - 1;
-    const meta = stages[idx] || {};
-    const picked = (meta.pickedIndex !== undefined && meta.pickedIndex !== null) ? meta.pickedIndex : (meta.attemptCount || 1) - 1;
-    const fields = meta.fields || d.fields || {};
+    const last = stages.length - 1;
+    const fields = (stages[last] || {}).fields || d.fields || {};
     $('mineName').textContent = fields.name || '내 몬스터';
-    $('mineImage').src = MISSING_IMAGE;
+    // 단계마다 학생이 고른 그림 한 장씩 (1차 소환 → 정식 소환 순서)
+    $('mineRow').innerHTML = stages.map(function(meta, i){
+      return '<figure class="mine-shot' + (i === last ? ' last' : '') + '">' +
+        '<img id="shot-' + i + '" src="' + MISSING_IMAGE + '" alt="' + stageLabel(i, stages.length) + ' 그림">' +
+        '<figcaption>' + stageLabel(i, stages.length) + '</figcaption>' +
+      '</figure>';
+    }).join('');
     $('mineCard').style.display = 'block';
-    const imgDoc = await db.collection('monsterDex').doc(myKey).collection('images').doc('s' + idx + '_a' + picked).get();
-    if(imgDoc.exists) $('mineImage').src = (imgDoc.data() || {}).data || MISSING_IMAGE;
+    stages.forEach(async function(meta, i){
+      const picked = (meta.pickedIndex !== undefined && meta.pickedIndex !== null) ? meta.pickedIndex : ((meta.attemptCount || 1) - 1);
+      try{
+        const imgDoc = await db.collection('monsterDex').doc(myKey).collection('images').doc('s' + i + '_a' + picked).get();
+        const el = $('shot-' + i);
+        if(el && imgDoc.exists) el.src = (imgDoc.data() || {}).data || MISSING_IMAGE;
+      }catch(e){ console.error(e); }
+    });
   }catch(e){ console.error(e); }
 }
 
