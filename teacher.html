@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>마무리 성찰 — 선생님 페이지</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
+<meta name="theme-color" content="#17C9AE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F5F2FF;
+  --paper:#FFFFFF;
+  --mint:#17C9AE;
+  --mint-dark:#0EA790;
+  --mint-2:#B9F3E7;
+  --mint-3:#E1FBF5;
+  --violet:#8B5CF6;
+  --violet-dark:#7440E0;
+  --violet-2:#DCCBFA;
+  --violet-3:#F1E9FF;
+  --yellow:#FFC93C;
+  --yellow-3:#FFF6DC;
+  --ink:#2B2140;
+  --sub:#6E6482;
+  --line:#E3DEF7;
+  --shadow-sm:2px 2px 0 rgba(43,33,64,.9);
+  --shadow:4px 4px 0 rgba(43,33,64,.9);
+  --shadow-lg:6px 6px 0 rgba(43,33,64,.9);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.title-font{font-family:'Black Han Sans',sans-serif;letter-spacing:-.2px;font-weight:400}
+button,input{font-family:inherit}
+.app{max-width:860px;margin:0 auto;padding:24px 20px 100px}
+
+.header{
+  text-align:center;padding:22px 20px 20px;
+  background:linear-gradient(135deg,var(--yellow) 0%,var(--mint-2) 100%);
+  border:3px solid var(--ink);border-radius:26px;margin-bottom:18px;
+  box-shadow:var(--shadow-lg);
+}
+.header h1{font-size:26px;margin:0 0 6px}
+.header .sub{color:var(--ink);opacity:.72;font-size:13px;font-weight:500;margin:0;line-height:1.7}
+
+.card{
+  background:var(--paper);border-radius:20px;border:2.5px solid var(--ink);
+  box-shadow:var(--shadow-lg);padding:22px;margin-bottom:16px;
+}
+.card h2{font-size:19px;margin:0 0 4px}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 16px;line-height:1.7;font-weight:500}
+
+.field input{
+  width:100%;border:2px solid var(--ink);border-radius:10px;
+  padding:10px 12px;font-size:14px;font-weight:500;color:var(--ink);background:#fff;
+}
+.field input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+
+.btn-main{
+  width:100%;margin-top:12px;border:2.5px solid var(--ink);border-radius:99px;
+  background:linear-gradient(180deg,var(--mint) 0%,var(--mint-dark) 100%);
+  color:#fff;font-size:15px;font-family:'Black Han Sans',sans-serif;letter-spacing:.3px;
+  padding:12px 20px;cursor:pointer;box-shadow:var(--shadow);transition:.12s;
+}
+.btn-main:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:5px 5px 0 rgba(43,33,64,.9)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input{
+  flex:1;min-width:160px;border:2px solid var(--ink);border-radius:99px;
+  padding:9px 16px;font-size:13px;font-weight:500;background:#fff;
+}
+.toolbar input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+.btn-sm{
+  border:2px solid var(--ink);border-radius:99px;background:#fff;color:var(--ink);
+  font-size:12px;font-weight:700;padding:8px 14px;cursor:pointer;transition:.12s;
+  box-shadow:var(--shadow-sm);white-space:nowrap;
+}
+.btn-sm:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(43,33,64,.9)}
+.btn-sm:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.btn-sm.violet{color:var(--violet-dark)}
+
+.count-pill{
+  background:var(--yellow);border:2px solid var(--ink);border-radius:99px;
+  font-size:12px;font-weight:800;padding:7px 14px;box-shadow:var(--shadow-sm);white-space:nowrap;
+}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{
+  background:#fff;border:2px solid var(--ink);border-radius:14px;padding:12px 14px;
+  box-shadow:var(--shadow-sm);text-align:center;
+}
+.stat .n{font-family:'Black Han Sans',sans-serif;font-size:24px;line-height:1.1;color:var(--violet-dark)}
+.stat .l{font-size:11px;font-weight:700;color:var(--sub);margin-top:3px}
+
+.filter-chip{
+  border:2px solid var(--ink);border-radius:99px;background:#fff;color:var(--ink);
+  font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;transition:.12s;white-space:nowrap;
+}
+.filter-chip.on{background:var(--ink);color:#fff}
+
+.student-row{
+  display:flex;align-items:center;gap:10px;flex-wrap:nowrap;
+  background:#fff;border:2px solid var(--ink);border-radius:12px;
+  padding:8px 12px;margin-bottom:7px;cursor:pointer;transition:.12s;
+}
+.student-row:hover{background:var(--violet-3)}
+.student-row .who{font-weight:800;font-size:13px;flex:none;white-space:nowrap}
+.student-row .monster{
+  color:var(--violet-dark);font-weight:700;font-size:12.5px;
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.student-row .meta{color:var(--sub);font-size:10.5px;flex:none;white-space:nowrap}
+.student-row .arrow{flex:none;font-size:12px;color:var(--sub);transition:.2s}
+.student-row.open .arrow{transform:rotate(90deg)}
+.ibtn{
+  border:none;background:none;font-size:15px;padding:4px 5px;cursor:pointer;
+  border-radius:8px;line-height:1;transition:.12s;flex:none;
+}
+.ibtn:hover{background:#fff;transform:translateY(-1px)}
+.badge{
+  flex:none;border:1.5px solid var(--ink);border-radius:99px;
+  font-size:10px;font-weight:800;padding:2px 8px;white-space:nowrap;
+}
+.badge.none{background:#F1EEF9;color:var(--sub)}
+.badge.doing{background:var(--yellow-3);color:#9A6B00}
+.badge.done{background:var(--mint-3);color:var(--mint-dark)}
+.badge.cls1{background:var(--mint);color:#fff}
+.badge.cls2{background:var(--violet);color:#fff}
+@media (max-width:640px){
+  .student-row .meta{display:none}
+}
+
+.detail{
+  background:var(--violet-3);border:2.5px dashed var(--ink);border-radius:16px;
+  padding:16px;margin:-4px 0 12px;
+}
+.detail .head-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.detail .thumb{
+  width:110px;height:110px;flex:none;border-radius:12px;border:2.5px solid var(--ink);
+  background:#fff;object-fit:cover;
+}
+.detail .side{flex:1;min-width:200px;background:var(--mint-3);border:2px solid var(--ink);border-radius:12px;padding:10px 14px}
+.detail .side .h{font-size:11px;font-weight:800;color:var(--mint-dark);margin-bottom:6px}
+.detail .side .l{font-size:12.5px;line-height:1.7;font-weight:600}
+
+.ans-card{background:#fff;border:2px solid var(--ink);border-radius:12px;padding:11px 14px;margin-bottom:8px}
+.ans-card .qh{font-size:11.5px;font-weight:800;color:var(--violet-dark);margin-bottom:5px;line-height:1.6}
+.ans-card .word{
+  display:inline-block;background:var(--violet-3);border:1.5px solid var(--ink);border-radius:99px;
+  padding:2px 10px;font-size:12px;font-weight:800;color:var(--violet-dark);margin-bottom:6px;
+}
+.ans-card .a{font-size:12.5px;line-height:1.7;white-space:pre-wrap;font-weight:500}
+.ans-card .a.blank{color:var(--sub)}
+
+.empty{
+  text-align:center;color:var(--sub);font-size:13px;font-weight:600;
+  padding:30px;background:#fff;border:2px dashed var(--ink);border-radius:16px;line-height:1.8;
+}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);
+  background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:99px;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.25s;z-index:50;
+  max-width:88vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── PDF 페이지 (화면 밖에서 그려서 이미지로 담음) ── */
+.pdf-holder{position:fixed;left:-10000px;top:0;width:794px}
+.pdf-page{
+  position:relative;width:794px;min-height:1123px;background:#fff;color:#2B2140;
+  font-family:'Noto Sans KR',sans-serif;padding:46px 52px 60px;box-sizing:border-box;
+}
+.pdf-page .pdf-foot{
+  position:absolute;left:52px;right:52px;bottom:24px;display:flex;justify-content:space-between;
+  font-size:10px;color:#6E6482;font-weight:600;border-top:1.5px solid #E3DEF7;padding-top:8px;
+}
+.pdf-title{
+  background:linear-gradient(135deg,#FFC93C 0%,#B9F3E7 100%);
+  border:3px solid #2B2140;border-radius:20px;padding:18px 22px 16px;margin:0 0 16px;
+}
+.pdf-title h1{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:24px;margin:0 0 4px;line-height:1.25}
+.pdf-title p{margin:0;font-size:11.5px;color:#2B2140;opacity:.75;font-weight:600}
+.pdf-head{display:flex;gap:16px;align-items:stretch;margin:0 0 14px}
+.pdf-head img{width:150px;height:150px;flex:none;object-fit:cover;border-radius:14px;border:3px solid #2B2140;background:#fff}
+.pdf-side{flex:1;background:#E1FBF5;border:2.5px solid #2B2140;border-radius:14px;padding:12px 16px}
+.pdf-side .h{font-size:11.5px;font-weight:800;color:#0EA790;margin-bottom:6px}
+.pdf-side .l{font-size:13px;line-height:1.8;font-weight:600}
+.pdf-ans{background:#fff;border:2.5px solid #2B2140;border-radius:14px;padding:12px 16px;margin:0 0 10px;box-shadow:3px 3px 0 rgba(43,33,64,.9)}
+.pdf-ans .qh{font-size:12.5px;font-weight:800;color:#7440E0;margin-bottom:6px;line-height:1.6}
+.pdf-ans .word{display:inline-block;background:#F1E9FF;border:2px solid #2B2140;border-radius:99px;padding:2px 12px;font-size:12.5px;font-weight:800;color:#7440E0;margin-bottom:7px}
+.pdf-ans .a{font-size:12.5px;line-height:1.75;white-space:pre-wrap;font-weight:500}
+.pdf-empty{text-align:center;color:#6E6482;font-size:13px;font-weight:600;padding:22px;border:2px dashed #2B2140;border-radius:14px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1 class="title-font">🔬 마무리 성찰 — 선생님 페이지</h1>
+    <p class="sub">학생들이 활동을 마치고 쓴 성찰 기록을 한눈에 모아 볼 수 있어요.</p>
+  </div>
+
+  <!-- 비밀번호 -->
+  <section id="authScreen">
+    <div class="card" style="max-width:380px;margin:0 auto">
+      <h2 class="title-font">🔑 선생님 확인</h2>
+      <p class="desc">비밀번호를 입력해주세요.</p>
+      <div class="field"><input type="password" id="pwInput" placeholder="비밀번호"></div>
+      <button class="btn-main" id="pwBtn">입장하기</button>
+    </div>
+  </section>
+
+  <!-- 본 화면 -->
+  <section id="mainScreen" style="display:none">
+    <div class="stats">
+      <div class="stat"><div class="n" id="statDone">0</div><div class="l">제출 완료</div></div>
+      <div class="stat"><div class="n" id="statDoing">0</div><div class="l">쓰는 중</div></div>
+      <div class="stat"><div class="n" id="statNone">0</div><div class="l">아직 안 씀</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="🔍 학번이나 이름으로 검색 (예: 202)">
+      <span class="count-pill" id="countPill">0명</span>
+      <button class="btn-sm" id="expandBtn">📂 전체 펼치기</button>
+      <button class="btn-sm" id="refreshBtn">🔄 새로고침</button>
+      <button class="btn-sm violet" id="exportAllBtn">📄 목록 전체 PDF 저장</button>
+    </div>
+    <div class="toolbar" style="margin-bottom:8px">
+      <button class="filter-chip on" data-cf="all">전체</button>
+      <button class="filter-chip" data-cf="1">A반</button>
+      <button class="filter-chip" data-cf="2">E반</button>
+      <button class="filter-chip" data-cf="none">분반 미지정</button>
+      <button class="filter-chip" data-cf="notdone">미제출만</button>
+    </div>
+    <p class="hint" id="hintText" style="font-size:11.5px;color:var(--sub);margin:0 0 14px;line-height:1.6">
+      💡 줄을 누르면 학생이 쓴 성찰이 몬스터 그림과 함께 펼쳐져요. 분반은 도감 선생님 페이지에서 지정한 값을 그대로 씁니다.
+    </p>
+    <div id="listBody"></div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+/* ⚠️ 아래 QUESTIONS는 학생 페이지(index.html)의 QUESTIONS와 똑같이 맞춰주세요.
+   질문을 바꿀 때는 두 파일 모두 고쳐야 합니다. */
+const QUESTIONS = [
+  {
+    key: 'change', icon: '🔄',
+    title: '처음 구상한 설정과 최종 작품, 무엇이 달라졌나요?',
+    hint: '달라진 부분과, 왜 그렇게 바꿨는지 함께 적어주세요.',
+    ph: '',
+  },
+  {
+    key: 'filled', icon: '✍️',
+    title: 'AI가 그려주지 못해서 내가 직접 채운 부분은 무엇인가요?',
+    hint: '',
+    ph: '',
+  },
+  {
+    key: 'roles', icon: '🤝',
+    title: '이번 활동에서 AI가 한 일과 내가 한 일을 나눠 적어보세요.',
+    hint: '',
+    ph: '',
+  },
+  {
+    key: 'metaphor', icon: '💡',
+    title: '나에게 AI는 어떤 존재인가요?',
+    hint: '',
+    ph: '',
+    blank: {before: '나에게 AI는', after: '같은 존재이다.'}
+  },
+];
+
+const PASSWORD = '0615';
+const CLASS_LABELS = {1:'A반', 2:'E반'};
+const MISSING_IMAGE = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#EDEAF7"/><text x="200" y="200" text-anchor="middle" font-size="20" fill="#6E6482" font-family="sans-serif">그림 없음</text></svg>');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyBtSooSc-eg4zMHQ_QF-ErmYJmtaYT1Fkg",
+  authDomain: "limi-88231.firebaseapp.com",
+  projectId: "limi-88231",
+  messagingSenderId: "361025367626",
+  appId: "1:361025367626:web:19d4e19d54558d4a79c0b3"
+});
+const db = firebase.firestore();
+const $ = id => document.getElementById(id);
+
+let students = [];        // {id, dex, ref}
+let studentById = {};
+let classMap = {};
+let classFilter = 'all';
+let openIds = new Set();
+const imageCache = {};
+
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(()=> t.classList.remove('show'), 2800);
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function fmtTime(ts){
+  if(!ts) return '';
+  try{ return new Date(ts).toLocaleString('ko-KR', {month:'numeric', day:'numeric', hour:'numeric', minute:'2-digit'}); }
+  catch(e){ return ''; }
+}
+
+/* ── 비밀번호 ── */
+function enter(){
+  $('authScreen').style.display = 'none';
+  $('mainScreen').style.display = 'block';
+  loadAll();
+}
+$('pwBtn').addEventListener('click', ()=>{
+  if($('pwInput').value === PASSWORD){
+    sessionStorage.setItem('mrTeacherAuth','1');
+    enter();
+  }else{
+    toast('비밀번호가 달라요');
+  }
+});
+$('pwInput').addEventListener('keydown', e=>{ if(e.key === 'Enter') $('pwBtn').click(); });
+if(sessionStorage.getItem('mrTeacherAuth') === '1') enter();
+
+/* ── 데이터 불러오기: 성찰 + 도감(이름·몬스터·그림) + 분반 ── */
+async function loadAll(){
+  $('listBody').innerHTML = '<div class="empty">성찰 기록을 모으는 중이에요...</div>';
+  try{
+    const [refSnap, dexSnap, cfgSnap] = await Promise.all([
+      db.collection('monsterReflect').get(),
+      db.collection('monsterDex').get(),
+      db.collection('monsterConfig').doc('classes').get(),
+    ]);
+    classMap = cfgSnap.exists ? ((cfgSnap.data() || {}).map || {}) : {};
+
+    students = [];
+    studentById = {};
+    dexSnap.forEach(d=>{
+      const s = {id: d.id, dex: d.data() || {}, ref: null};
+      students.push(s);
+      studentById[s.id] = s;
+    });
+    refSnap.forEach(d=>{
+      const data = d.data() || {};
+      if(studentById[d.id]){
+        studentById[d.id].ref = data;
+      }else{
+        // 도감 기록 없이 성찰만 쓴 경우 (예: 이름을 다르게 입력)
+        const m = String(d.id || '').match(/^([^_]*)_(.*)$/);
+        const s = {
+          id: d.id,
+          dex: {studentNo: data.studentNo || (m ? m[1] : ''), studentName: data.studentName || (m ? m[2] : d.id), fields: {}, stages: []},
+          ref: data,
+          ghost: true
+        };
+        students.push(s);
+        studentById[s.id] = s;
+      }
+    });
+    students.sort((a,b)=> String(a.dex.studentNo||'').localeCompare(String(b.dex.studentNo||''), 'ko', {numeric:true}));
+
+    let done = 0, doing = 0, none = 0;
+    students.forEach(s=>{
+      const st = stateOf(s);
+      if(st === 'done') done++;
+      else if(st === 'doing') doing++;
+      else none++;
+    });
+    $('statDone').textContent = done;
+    $('statDoing').textContent = doing;
+    $('statNone').textContent = none;
+    renderList();
+  }catch(e){
+    console.error(e);
+    $('listBody').innerHTML = '<div class="empty">서버에서 기록을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침을 눌러주세요.</div>';
+  }
+}
+
+function answersOf(s){ return (s.ref && s.ref.answers) || {}; }
+function filledOf(s){
+  const a = answersOf(s);
+  return QUESTIONS.filter(q=> (a[q.key] || '').trim()).length;
+}
+function stateOf(s){
+  if(s.ref && s.ref.submittedAt) return 'done';
+  if(filledOf(s) > 0) return 'doing';
+  return 'none';
+}
+function monsterName(s){
+  const f = (s.dex && s.dex.fields) || {};
+  return f.name || '(이름 없음)';
+}
+function whoLabel(s){
+  return (String(s.dex.studentNo||'') + ' ' + String(s.dex.studentName||'')).trim() || '?';
+}
+function stateBadge(s){
+  const st = stateOf(s);
+  if(st === 'done') return '<span class="badge done">제출 완료</span>';
+  if(st === 'doing') return '<span class="badge doing">쓰는 중 ' + filledOf(s) + '/' + QUESTIONS.length + '</span>';
+  return '<span class="badge none">아직 안 씀</span>';
+}
+function classBadge(id){
+  const c = classMap[id];
+  return c ? '<span class="badge cls' + c + '">' + CLASS_LABELS[c] + '</span>' : '';
+}
+function filteredStudents(){
+  const q = $('searchInput').value.trim().toLowerCase();
+  return students.filter(s=>{
+    if(classFilter === '1' && classMap[s.id] !== 1) return false;
+    if(classFilter === '2' && classMap[s.id] !== 2) return false;
+    if(classFilter === 'none' && classMap[s.id]) return false;
+    if(classFilter === 'notdone' && stateOf(s) === 'done') return false;
+    if(!q) return true;
+    return String(s.dex.studentNo||'').toLowerCase().includes(q) ||
+           String(s.dex.studentName||'').toLowerCase().includes(q);
+  });
+}
+
+function renderList(){
+  const list = filteredStudents();
+  $('countPill').textContent = list.length + '명';
+  if(list.length === 0){
+    $('listBody').innerHTML = '<div class="empty">보여줄 학생이 없어요.<br>학생들이 성찰을 쓰면 여기에 모여요.</div>';
+    return;
+  }
+  $('listBody').innerHTML = list.map(s=>{
+    const isOpen = openIds.has(s.id);
+    const last = (s.ref && (s.ref.submittedAt || s.ref.updatedAt)) || 0;
+    return '' +
+    '<div class="student-row' + (isOpen ? ' open' : '') + '" data-id="' + escapeHTML(s.id) + '">' +
+      '<span class="arrow">▶</span>' +
+      '<span class="who">' + escapeHTML(s.dex.studentNo||'?') + ' ' + escapeHTML(s.dex.studentName||'') + '</span>' +
+      '<span class="monster">' + (s.ghost ? '<span style="color:var(--sub)">도감 기록 없음</span>' : '🐾 ' + escapeHTML(monsterName(s))) + '</span>' +
+      classBadge(s.id) +
+      stateBadge(s) +
+      '<span class="meta" title="마지막 저장 시각">' + fmtTime(last) + '</span>' +
+      '<button class="ibtn" data-act="pdf" title="이 학생만 PDF 저장">📄</button>' +
+    '</div>' +
+    '<div class="detail" id="detail-' + escapeHTML(s.id) + '" style="display:' + (isOpen ? 'block' : 'none') + '"></div>';
+  }).join('');
+
+  $('listBody').querySelectorAll('.student-row').forEach(row=>{
+    row.addEventListener('click', e=>{
+      if(e.target.closest('[data-act="pdf"]')){ exportOne(row.dataset.id); return; }
+      toggleDetail(row.dataset.id);
+    });
+  });
+  list.forEach(s=>{ if(openIds.has(s.id)) fillDetail(s.id); });
+}
+
+/* ── 몬스터 그림: 펼칠 때만 불러옴 (용량이 커서) ── */
+async function getImage(id){
+  if(imageCache[id] !== undefined) return imageCache[id];
+  const s = studentById[id];
+  const stages = (s && s.dex && s.dex.stages) || [];
+  if(!stages.length){ imageCache[id] = MISSING_IMAGE; return MISSING_IMAGE; }
+  const stageIdx = stages.length - 1;
+  const meta = stages[stageIdx] || {};
+  const picked = (meta.pickedIndex !== undefined && meta.pickedIndex !== null) ? meta.pickedIndex : (meta.attemptCount || 1) - 1;
+  try{
+    const doc = await db.collection('monsterDex').doc(id).collection('images').doc('s' + stageIdx + '_a' + picked).get();
+    imageCache[id] = doc.exists ? ((doc.data() || {}).data || MISSING_IMAGE) : MISSING_IMAGE;
+  }catch(e){ console.error(e); imageCache[id] = MISSING_IMAGE; }
+  return imageCache[id];
+}
+
+function toggleDetail(id){
+  const row = $('listBody').querySelector('.student-row[data-id="' + CSS.escape(id) + '"]');
+  const box = $('detail-' + id);
+  if(!box) return;
+  if(openIds.has(id)){
+    openIds.delete(id);
+    box.style.display = 'none';
+    if(row) row.classList.remove('open');
+    return;
+  }
+  openIds.add(id);
+  box.style.display = 'block';
+  if(row) row.classList.add('open');
+  fillDetail(id);
+}
+
+function answerCards(s, cls){
+  const a = answersOf(s);
+  return QUESTIONS.map((q, i)=>{
+    const txt = (a[q.key] || '').trim();
+    const w = (a[q.key + '_word'] || '').trim();
+    return '<div class="' + cls + '">' +
+      '<div class="qh">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
+      (q.blank && w ? '<div class="word">' + escapeHTML(q.blank.before) + ' ' + escapeHTML(w) + ' ' + escapeHTML(q.blank.after) + '</div><br>' : '') +
+      '<div class="a' + (txt ? '' : ' blank') + '">' + (txt ? escapeHTML(txt) : '(빈칸)') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function fillDetail(id){
+  const s = studentById[id];
+  const box = $('detail-' + id);
+  if(!s || !box) return;
+  const st = stateOf(s);
+  const when = (s.ref && s.ref.submittedAt) ? ('제출 · ' + fmtTime(s.ref.submittedAt))
+             : (s.ref && s.ref.updatedAt) ? ('마지막 저장 · ' + fmtTime(s.ref.updatedAt)) : '기록 없음';
+  box.innerHTML =
+    '<div class="head-row">' +
+      '<img class="thumb" id="thumb-' + escapeHTML(id) + '" src="' + MISSING_IMAGE + '" alt="">' +
+      '<div class="side">' +
+        '<div class="h">🐾 ' + escapeHTML(monsterName(s)) + '</div>' +
+        '<div class="l">' + escapeHTML(whoLabel(s)) + '<br>' + escapeHTML(when) + '</div>' +
+      '</div>' +
+    '</div>' +
+    (st === 'none' ? '<div class="empty" style="padding:16px">아직 이 학생이 쓴 성찰이 없어요.</div>' : answerCards(s, 'ans-card'));
+  const img = await getImage(id);
+  const el = $('thumb-' + id);
+  if(el) el.src = img;
+}
+
+/* ── 툴바 ── */
+document.querySelectorAll('.filter-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    classFilter = chip.dataset.cf;
+    document.querySelectorAll('.filter-chip').forEach(c=> c.classList.toggle('on', c === chip));
+    renderList();
+  });
+});
+$('searchInput').addEventListener('input', renderList);
+$('refreshBtn').addEventListener('click', ()=>{
+  Object.keys(imageCache).forEach(k=> delete imageCache[k]);
+  loadAll();
+});
+$('expandBtn').addEventListener('click', ()=>{
+  const list = filteredStudents();
+  const allOpen = list.length > 0 && list.every(s=> openIds.has(s.id));
+  if(allOpen){
+    list.forEach(s=> openIds.delete(s.id));
+    $('expandBtn').textContent = '📂 전체 펼치기';
+  }else{
+    list.forEach(s=> openIds.add(s.id));
+    $('expandBtn').textContent = '📁 전체 접기';
+  }
+  renderList();
+});
+
+/* ── PDF 저장 (도감·추리 선생님 페이지와 같은 방식) ── */
+let busy = false;
+function loadScriptOnce(src){
+  loadScriptOnce._cache = loadScriptOnce._cache || {};
+  if(!loadScriptOnce._cache[src]){
+    loadScriptOnce._cache[src] = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = ()=>{ delete loadScriptOnce._cache[src]; reject(new Error('PDF 라이브러리를 불러오지 못했어요')); };
+      document.head.appendChild(s);
+    });
+  }
+  return loadScriptOnce._cache[src];
+}
+async function ensurePdfLibs(){
+  await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+  await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+}
+function cleanName(s){ return String(s || '').trim().replace(/[^\w가-힣]/g,''); }
+function todayLabel(){ return new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'long', day:'numeric'}); }
+
+async function buildBlocks(id){
+  const s = studentById[id];
+  const who = escapeHTML(s.dex.studentNo || '-') + ' ' + escapeHTML(s.dex.studentName || '');
+  const cls = CLASS_LABELS[classMap[id]] ? ' · ' + CLASS_LABELS[classMap[id]] : '';
+  const when = (s.ref && s.ref.submittedAt) ? '제출 ' + fmtTime(s.ref.submittedAt)
+             : (s.ref && s.ref.updatedAt) ? '작성 중 · 마지막 저장 ' + fmtTime(s.ref.updatedAt) : '기록 없음';
+  const img = await getImage(id);
+  const blocks = [];
+  blocks.push(
+    '<div class="pdf-title">' +
+      '<h1>📓 ' + who + '의 마무리 성찰</h1>' +
+      '<p>' + escapeHTML(monsterName(s)) + cls + ' · ' + escapeHTML(when) + ' · ' + todayLabel() + '</p>' +
+    '</div>' +
+    '<div class="pdf-head">' +
+      '<img src="' + img + '" alt="">' +
+      '<div class="pdf-side"><div class="h">🐾 이 학생이 만든 생명체</div><div class="l">' + escapeHTML(monsterName(s)) + '<br>' + who + cls + '</div></div>' +
+    '</div>');
+  if(stateOf(s) === 'none'){
+    blocks.push('<div class="pdf-empty">아직 이 학생이 쓴 성찰이 없어요.</div>');
+  }else{
+    const a = answersOf(s);
+    QUESTIONS.forEach((q, i)=>{
+      const txt = (a[q.key] || '').trim();
+      const w = (a[q.key + '_word'] || '').trim();
+      blocks.push('<div class="pdf-ans">' +
+        '<div class="qh">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
+        (q.blank && w ? '<div class="word">' + escapeHTML(q.blank.before) + ' ' + escapeHTML(w) + ' ' + escapeHTML(q.blank.after) + '</div><br>' : '') +
+        '<div class="a">' + (txt ? escapeHTML(txt) : '(빈칸)') + '</div>' +
+      '</div>');
+    });
+  }
+  return blocks;
+}
+
+function paginate(holder, blocks, footLabel){
+  const pages = [];
+  const newPage = ()=>{
+    const p = document.createElement('div');
+    p.className = 'pdf-page';
+    holder.appendChild(p);
+    pages.push(p);
+    return p;
+  };
+  let page = newPage();
+  blocks.forEach(html=>{
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const nodes = Array.from(tmp.children);
+    nodes.forEach(n=> page.appendChild(n));
+    if(page.scrollHeight > 1123 && page.children.length > nodes.length){
+      page = newPage();
+      nodes.forEach(n=> page.appendChild(n));
+    }
+  });
+  pages.forEach((p, i)=>{
+    const f = document.createElement('div');
+    f.className = 'pdf-foot';
+    f.innerHTML = '<span>2050 몬스터 도감 · 마무리 성찰</span><span>' + escapeHTML(footLabel) + ' · ' + (i+1) + ' / ' + pages.length + '</span>';
+    p.appendChild(f);
+  });
+  return pages;
+}
+
+async function renderPagesToPdf(pdf, pages, firstPage){
+  for(let i = 0; i < pages.length; i++){
+    const canvas = await html2canvas(pages[i], {scale: 2, backgroundColor: '#ffffff', logging: false});
+    if(!firstPage || i > 0) pdf.addPage();
+    const imgData = canvas.toDataURL('image/jpeg', .92);
+    const h = canvas.height * 210 / canvas.width;
+    if(h > 297){
+      const s = 297 / h;
+      pdf.addImage(imgData, 'JPEG', (210 - 210 * s) / 2, 0, 210 * s, 297);
+    }else{
+      pdf.addImage(imgData, 'JPEG', 0, 0, 210, h);
+    }
+  }
+}
+
+async function renderStudentToPdf(pdf, id, first){
+  const holder = document.createElement('div');
+  holder.className = 'pdf-holder';
+  document.body.appendChild(holder);
+  try{
+    const blocks = await buildBlocks(id);
+    const pages = paginate(holder, blocks, whoLabel(studentById[id]));
+    await new Promise(r=> setTimeout(r, 120));
+    await renderPagesToPdf(pdf, pages, first);
+  }finally{
+    holder.remove();
+  }
+}
+
+async function exportOne(id){
+  if(busy){ toast('지금 다른 PDF를 만드는 중이에요'); return; }
+  const s = studentById[id];
+  if(!s) return;
+  busy = true;
+  try{
+    toast('PDF를 만드는 중이에요...');
+    await ensurePdfLibs();
+    const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+    await renderStudentToPdf(pdf, id, true);
+    pdf.save(cleanName(s.dex.studentNo) + '_' + cleanName(s.dex.studentName) + '_마무리성찰.pdf');
+    toast('PDF로 저장했어요');
+  }catch(e){
+    console.error(e);
+    toast('PDF 만들기에 실패했어요: ' + e.message);
+  }finally{
+    busy = false;
+  }
+}
+
+$('exportAllBtn').addEventListener('click', async ()=>{
+  if(busy){ toast('지금 다른 PDF를 만드는 중이에요'); return; }
+  const list = filteredStudents().filter(s=> stateOf(s) !== 'none');
+  if(list.length === 0){ toast('PDF로 만들 성찰 기록이 없어요'); return; }
+  if(!confirm('지금 목록에서 성찰을 쓴 ' + list.length + '명을 PDF 한 파일로 저장할까요?\n(학생 수가 많으면 몇 분 걸릴 수 있어요)')) return;
+
+  busy = true;
+  const btn = $('exportAllBtn');
+  const prevText = btn.textContent;
+  btn.disabled = true;
+  try{
+    await ensurePdfLibs();
+    const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+    for(let n = 0; n < list.length; n++){
+      btn.textContent = '📄 만드는 중... ' + (n+1) + '/' + list.length;
+      await renderStudentToPdf(pdf, list[n].id, n === 0);
+    }
+    const today = new Date().toISOString().slice(0,10);
+    const q = $('searchInput').value.trim();
+    const cfLabel = classFilter === '1' ? '_A반' : classFilter === '2' ? '_E반' : classFilter === 'none' ? '_분반미지정' : '';
+    pdf.save('마무리성찰' + cfLabel + (q ? '_' + cleanName(q) : '') + '_' + today + '.pdf');
+    toast(list.length + '명의 기록을 PDF 한 파일로 저장했어요');
+  }catch(e){
+    console.error(e);
+    toast('PDF 만들기에 실패했어요: ' + e.message);
+  }finally{
+    busy = false;
+    btn.disabled = false;
+    btn.textContent = prevText;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2050 몬스터 도감 — 마무리 성찰</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📓</text></svg>">
+<meta name="theme-color" content="#17C9AE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F5F2FF;
+  --paper:#FFFFFF;
+  --mint:#17C9AE;
+  --mint-dark:#0EA790;
+  --mint-2:#B9F3E7;
+  --mint-3:#E1FBF5;
+  --violet:#8B5CF6;
+  --violet-dark:#7440E0;
+  --violet-2:#DCCBFA;
+  --violet-3:#F1E9FF;
+  --yellow:#FFC93C;
+  --yellow-3:#FFF6DC;
+  --ink:#2B2140;
+  --sub:#6E6482;
+  --line:#E3DEF7;
+  --shadow-sm:2px 2px 0 rgba(43,33,64,.9);
+  --shadow:4px 4px 0 rgba(43,33,64,.9);
+  --shadow-lg:6px 6px 0 rgba(43,33,64,.9);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.title-font{font-family:'Black Han Sans',sans-serif;letter-spacing:-.2px;font-weight:400}
+button,input,textarea{font-family:inherit}
+.app{max-width:620px;margin:0 auto;padding:24px 20px 100px}
+
+.header{
+  text-align:center;padding:22px 20px 20px;
+  background:linear-gradient(135deg,var(--yellow) 0%,var(--mint-2) 100%);
+  border:3px solid var(--ink);border-radius:26px;margin-bottom:18px;
+  box-shadow:var(--shadow-lg);
+}
+.header h1{font-size:26px;margin:0 0 6px}
+.header .sub{color:var(--ink);opacity:.72;font-size:13px;font-weight:500;margin:0;line-height:1.7}
+
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.student-badge{
+  display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--ink);
+  border-radius:99px;padding:5px 6px 5px 14px;font-size:12px;font-weight:800;
+}
+.student-badge button{
+  border:none;background:var(--mint-3);color:var(--mint-dark);border-radius:99px;
+  padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.student-badge button:hover{background:var(--mint-2)}
+.toolbar-spacer{margin-left:auto}
+.save-state{font-size:11.5px;font-weight:700;color:var(--sub);white-space:nowrap}
+.btn-sm{
+  border:2px solid var(--ink);border-radius:99px;background:#fff;color:var(--ink);
+  font-size:12px;font-weight:700;padding:8px 14px;cursor:pointer;transition:.12s;
+  box-shadow:var(--shadow-sm);white-space:nowrap;
+}
+.btn-hub{text-decoration:none;display:inline-flex;align-items:center;line-height:1.2}
+.btn-sm:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(43,33,64,.9)}
+.btn-sm:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+.card{
+  background:var(--paper);border-radius:20px;border:2.5px solid var(--ink);
+  box-shadow:var(--shadow-lg);padding:22px;margin-bottom:16px;
+}
+.card h2{font-size:19px;margin:0 0 4px}
+.card .desc{color:var(--sub);font-size:12.5px;margin:0 0 16px;line-height:1.7;font-weight:500}
+
+/* 내 몬스터 미리보기 */
+.mine-box{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.mine-box img{
+  width:104px;height:104px;flex:none;object-fit:cover;
+  border-radius:14px;border:2.5px solid var(--ink);background:#fff;box-shadow:var(--shadow-sm);
+}
+.mine-box .info{flex:1;min-width:180px}
+.mine-box .info .nm{font-family:'Black Han Sans',sans-serif;font-size:22px;line-height:1.2;margin-bottom:4px}
+.mine-box .info .note{font-size:12px;color:var(--sub);font-weight:500;line-height:1.6}
+
+/* 질문 카드 */
+.q-card{
+  background:#fff;border:2.5px solid var(--ink);border-radius:18px;
+  padding:18px 18px 16px;margin-bottom:14px;box-shadow:var(--shadow);
+}
+.q-num{
+  display:inline-flex;align-items:center;gap:6px;background:var(--yellow-3);
+  border:2px solid var(--ink);border-radius:99px;padding:3px 11px;
+  font-size:11px;font-weight:800;margin-bottom:9px;
+}
+.q-title{font-size:16px;font-weight:800;line-height:1.5;margin:0 0 4px}
+.q-hint{font-size:12px;color:var(--sub);font-weight:500;line-height:1.6;margin:0 0 10px}
+.q-card textarea{
+  width:100%;border:2px solid var(--ink);border-radius:12px;
+  padding:11px 13px;font-size:14px;font-weight:500;color:var(--ink);background:#fff;
+  resize:vertical;line-height:1.6;min-height:82px;
+}
+.q-card textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+.blank-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--violet-3);border:2px dashed var(--ink);border-radius:12px;
+  padding:11px 13px;margin-bottom:10px;font-size:15px;font-weight:700;
+}
+.blank-row input{
+  flex:1;min-width:120px;border:none;border-bottom:2.5px solid var(--ink);background:transparent;
+  font-size:16px;font-weight:800;color:var(--violet-dark);padding:4px 6px;text-align:center;
+}
+.blank-row input:focus{outline:none;background:#fff;border-radius:8px 8px 0 0}
+
+.btn-main{
+  width:100%;margin-top:6px;border:2.5px solid var(--ink);border-radius:99px;
+  background:linear-gradient(180deg,var(--mint) 0%,var(--mint-dark) 100%);
+  color:#fff;font-size:15px;font-family:'Black Han Sans',sans-serif;letter-spacing:.3px;
+  padding:13px 20px;cursor:pointer;box-shadow:var(--shadow);transition:.12s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.btn-main:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:5px 5px 0 rgba(43,33,64,.9)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-main.violet{background:linear-gradient(180deg,var(--violet) 0%,var(--violet-dark) 100%)}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.field input{
+  width:100%;border:2px solid var(--ink);border-radius:10px;
+  padding:10px 12px;font-size:14px;font-weight:500;color:var(--ink);background:#fff;
+}
+.field input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+
+.screen{display:none}
+.screen.active{display:block;animation:screenIn .35s ease}
+@keyframes screenIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* 제출 완료 */
+.done-top{
+  text-align:center;padding:26px 20px 22px;
+  background:linear-gradient(180deg,#FFE58A 0%,var(--yellow) 100%);
+  border:3px solid var(--ink);border-radius:20px;box-shadow:var(--shadow);margin-bottom:16px;
+}
+.done-top .ic{font-size:44px;line-height:1}
+.done-top h2{font-size:23px;margin:8px 0 6px}
+.done-top p{margin:0;font-size:13px;font-weight:500;line-height:1.7}
+.ans-block{border-top:1.5px solid var(--line);padding:13px 0}
+.ans-block:first-child{border-top:none;padding-top:0}
+.ans-block .h{font-size:12.5px;font-weight:800;color:var(--violet-dark);margin-bottom:5px;line-height:1.6}
+.ans-block .a{font-size:13.5px;line-height:1.75;white-space:pre-wrap;font-weight:500}
+.ans-block .a.blank{color:var(--sub)}
+.ans-block .word{
+  display:inline-block;background:var(--violet-3);border:2px solid var(--ink);border-radius:99px;
+  padding:3px 12px;font-weight:800;color:var(--violet-dark);margin-bottom:7px;font-size:13px;
+}
+
+.empty{
+  text-align:center;color:var(--sub);font-size:13px;font-weight:600;
+  padding:26px;background:#fff;border:2px dashed var(--ink);border-radius:16px;line-height:1.8;
+}
+.teacher-link{
+  display:block;text-align:center;margin-top:14px;font-size:11px;
+  color:var(--sub);opacity:.25;text-decoration:none;
+}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);
+  background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:11px 18px;border-radius:99px;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.25s;z-index:50;
+  max-width:88vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="toolbar" id="topToolbar">
+    <a class="btn-sm btn-hub" href="https://miynuees.github.io/monster-hub/" title="몬스터 연구소(대문)로 돌아가기">🧪 연구소</a>
+    <div class="student-badge" id="badgeWrap" style="display:none"><span id="badgeText"></span><button type="button" id="switchBtn">전환</button></div>
+    <span class="toolbar-spacer"></span>
+    <span class="save-state" id="saveState"></span>
+  </div>
+
+  <div class="header">
+    <h1 class="title-font">📓 마무리 성찰</h1>
+    <p class="sub">생명체 한 마리를 만드는 연구가 끝났다.<br>이번 연구에서 무엇을 했는지 기록으로 남겨두자.</p>
+  </div>
+
+  <!-- 로그인 -->
+  <section class="screen active" id="screen-login">
+    <div class="card" style="max-width:400px;margin:0 auto">
+      <h2 class="title-font">🔑 연구원 확인</h2>
+      <p class="desc">몬스터 도감에서 쓴 학번과 이름 그대로 입력해주세요.</p>
+      <div class="field">
+        <label for="loginNo">학번</label>
+        <input type="text" id="loginNo" placeholder="예: 20305">
+      </div>
+      <div class="field">
+        <label for="loginName">이름</label>
+        <input type="text" id="loginName" placeholder="예: 홍길동">
+      </div>
+      <button class="btn-main" id="loginBtn">🚪 입장하기</button>
+    </div>
+    <a class="teacher-link" href="teacher.html" title="선생님용 확인 페이지">·</a>
+  </section>
+
+  <!-- 작성 -->
+  <section class="screen" id="screen-write">
+    <div class="card" id="mineCard" style="display:none">
+      <div class="mine-box">
+        <img id="mineImage" alt="내가 소환한 생명체">
+        <div class="info">
+          <div class="nm" id="mineName">내 몬스터</div>
+          <div class="note">내가 만든 생명체를 보면서 아래 질문에 답해보세요.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="qBody"></div>
+
+    <button class="btn-main" id="submitBtn">📮 기록 제출하기</button>
+    <p class="desc" style="text-align:center;margin:10px 0 0">쓰는 동안 자동으로 저장돼요. 제출한 뒤에도 다시 고칠 수 있어요.</p>
+  </section>
+
+  <!-- 제출 완료 -->
+  <section class="screen" id="screen-done">
+    <div class="done-top">
+      <div class="ic">📓</div>
+      <h2 class="title-font">연구 기록을 제출했어요</h2>
+      <p>이 기록은 선생님에게 그대로 전달돼요.</p>
+    </div>
+    <div class="card">
+      <h2 class="title-font">📝 내가 쓴 기록</h2>
+      <p class="desc" id="doneWhen"></p>
+      <div id="doneBody"></div>
+    </div>
+    <button class="btn-main violet" id="editBtn">✏️ 다시 고치기</button>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════════
+   성찰 질문 — 여기만 고치면 학생 화면과 선생님 페이지가 함께 바뀝니다
+   key   : 저장에 쓰는 이름 (영문. 수업에 한번 쓴 뒤에는 바꾸지 말 것)
+   icon  : 앞에 붙는 그림문자
+   title : 질문 (굵게 나오는 줄)
+   hint  : 아래 작은 안내 (필요 없으면 '')
+   ph    : 입력칸에 흐리게 보이는 예시
+   blank : {before, after} 를 넣으면 빈칸 채우기 한 줄이 위에 생김 (없으면 생략)
+   ════════════════════════════════════════════════════════════════ */
+const QUESTIONS = [
+  {
+    key: 'change', icon: '🔄',
+    title: '처음 구상한 설정과 최종 작품, 무엇이 달라졌나요?',
+    hint: '달라진 부분과, 왜 그렇게 바꿨는지 함께 적어주세요.',
+    ph: '예: 처음엔 등에 가시가 잔뜩 난 모습이었는데, 겁이 많은 성격이 더 잘 보이도록 몸을 웅크린 모습으로 바꿨어요'
+  },
+  {
+    key: 'filled', icon: '✍️',
+    title: 'AI가 그려주지 못해서 내가 직접 채운 부분은 무엇인가요?',
+    hint: '',
+    ph: '예: 급식 냄새를 맡을 때의 표정은 아무리 설명해도 안 나와서 마지막에 직접 그렸어요'
+  },
+  {
+    key: 'roles', icon: '🤝',
+    title: '이번 활동에서 AI가 한 일과 내가 한 일을 나눠 적어보세요.',
+    hint: '',
+    ph: '예: AI는 —, 나는 —'
+  },
+  {
+    key: 'metaphor', icon: '💡',
+    title: '나에게 AI는 어떤 존재인가요?',
+    hint: '빈칸을 채우고, 그렇게 생각한 이유를 적어주세요.',
+    ph: '예: 말한 대로 빠르게 그려주지만, 무엇을 그릴지는 정해주지 않기 때문이에요',
+    blank: {before: '나에게 AI는', after: '같은 존재이다.'}
+  },
+];
+/* ════════════════════════════════════════════════════════════════ */
+
+firebase.initializeApp({
+  apiKey: "AIzaSyBtSooSc-eg4zMHQ_QF-ErmYJmtaYT1Fkg",
+  authDomain: "limi-88231.firebaseapp.com",
+  projectId: "limi-88231",
+  messagingSenderId: "361025367626",
+  appId: "1:361025367626:web:19d4e19d54558d4a79c0b3"
+});
+const db = firebase.firestore();
+const COLLECTION = 'monsterReflect';
+const $ = id => document.getElementById(id);
+
+const MISSING_IMAGE = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#EDEAF7"/><text x="200" y="200" text-anchor="middle" font-size="20" fill="#6E6482" font-family="sans-serif">그림 없음</text></svg>');
+
+let myKey = null;
+let myNo = '', myName = '';
+let answers = {};        // {질문key: 쓴 글, 질문key_word: 빈칸에 쓴 단어}
+let submittedAt = 0;
+let busy = false;
+
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(()=> t.classList.remove('show'), 2800);
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function sanitizeKey(no, name){
+  const clean = s => (s || '').trim().replace(/\s+/g,'');
+  return clean(no) + '_' + clean(name);
+}
+function cloudId(key){
+  return String(key).replace(/[\/#$\[\].]/g, '_');
+}
+function fmtTime(ts){
+  if(!ts) return '';
+  try{ return new Date(ts).toLocaleString('ko-KR', {month:'numeric', day:'numeric', hour:'numeric', minute:'2-digit'}); }
+  catch(e){ return ''; }
+}
+function goTo(name){
+  document.querySelectorAll('.screen').forEach(s=> s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ── 허브·도감·추리와 공유하는 로그인 메모 ── */
+const SHARED_LOGIN_KEY = 'monsterLogin';
+function readSharedLogin(){
+  try{
+    const v = JSON.parse(localStorage.getItem(SHARED_LOGIN_KEY) || 'null');
+    if(v && v.no && v.name) return v;
+  }catch(e){}
+  return null;
+}
+function writeSharedLogin(no, name){
+  try{ localStorage.setItem(SHARED_LOGIN_KEY, JSON.stringify({no, name, at: Date.now()})); }catch(e){}
+}
+function clearSharedLogin(){
+  try{ localStorage.removeItem(SHARED_LOGIN_KEY); }catch(e){}
+}
+/* 서버가 안 될 때를 대비한 이 기기 백업 */
+function localKey(){ return 'monsterReflect_' + myKey; }
+function saveLocal(){
+  try{ localStorage.setItem(localKey(), JSON.stringify({answers, submittedAt, at: Date.now()})); }catch(e){}
+}
+function loadLocal(){
+  try{ return JSON.parse(localStorage.getItem(localKey()) || 'null'); }catch(e){ return null; }
+}
+
+/* ── 로그인 ── */
+$('loginBtn').addEventListener('click', ()=> login(false));
+['loginNo','loginName'].forEach(id=>{
+  $(id).addEventListener('keydown', e=>{ if(e.key === 'Enter') login(false); });
+});
+$('switchBtn').addEventListener('click', ()=>{
+  if(!confirm('다른 학생으로 전환할까요? 지금까지 쓴 기록은 그대로 저장돼 있어요.')) return;
+  clearSharedLogin();
+  location.reload();
+});
+
+async function login(auto){
+  const no = $('loginNo').value.trim();
+  const name = $('loginName').value.trim();
+  if(!no || !name){ toast('학번과 이름을 모두 입력해주세요'); return; }
+  if(busy) return;
+  writeSharedLogin(no, name);   // 다른 몬스터 사이트에서도 같은 학생으로 바로 입장되게
+  busy = true;
+  const btn = $('loginBtn');
+  btn.disabled = true;
+  btn.textContent = '기록을 불러오는 중이에요...';
+  myKey = cloudId(sanitizeKey(no, name));
+  myNo = no; myName = name;
+
+  // 전에 쓰던 성찰 불러오기: 서버 우선, 없으면 이 기기 백업
+  let loaded = null;
+  try{
+    const snap = await db.collection(COLLECTION).doc(myKey).get();
+    if(snap.exists) loaded = snap.data() || null;
+  }catch(e){ console.error(e); }
+  const local = loadLocal();
+  if(!loaded && local) loaded = local;
+  answers = (loaded && loaded.answers) || {};
+  submittedAt = (loaded && loaded.submittedAt) || 0;
+
+  $('badgeText').textContent = myNo + ' · ' + myName;
+  $('badgeWrap').style.display = 'flex';
+  busy = false;
+  btn.disabled = false;
+  btn.textContent = '🚪 입장하기';
+  if(auto === true) toast(myName + "(으)로 자동 입장했어요. 본인이 아니면 위의 '전환'을 누르세요");
+
+  renderQuestions();
+  loadMyMonster();
+  if(submittedAt) showDone();
+  else goTo('write');
+}
+
+/* ── 내 몬스터 그림: 몬스터 도감 기록에서 가져와 보여줌 ── */
+async function loadMyMonster(){
+  try{
+    const snap = await db.collection('monsterDex').doc(myKey).get();
+    if(!snap.exists) return;
+    const d = snap.data() || {};
+    const stages = d.stages || [];
+    if(!stages.length) return;
+    const idx = stages.length - 1;
+    const meta = stages[idx] || {};
+    const picked = (meta.pickedIndex !== undefined && meta.pickedIndex !== null) ? meta.pickedIndex : (meta.attemptCount || 1) - 1;
+    const fields = meta.fields || d.fields || {};
+    $('mineName').textContent = fields.name || '내 몬스터';
+    $('mineImage').src = MISSING_IMAGE;
+    $('mineCard').style.display = 'block';
+    const imgDoc = await db.collection('monsterDex').doc(myKey).collection('images').doc('s' + idx + '_a' + picked).get();
+    if(imgDoc.exists) $('mineImage').src = (imgDoc.data() || {}).data || MISSING_IMAGE;
+  }catch(e){ console.error(e); }
+}
+
+/* ── 질문 그리기 ── */
+function renderQuestions(){
+  $('qBody').innerHTML = QUESTIONS.map((q, i)=>
+    '<div class="q-card">' +
+      '<span class="q-num">' + q.icon + ' 질문 ' + (i + 1) + '</span>' +
+      '<p class="q-title">' + escapeHTML(q.title) + '</p>' +
+      (q.hint ? '<p class="q-hint">' + escapeHTML(q.hint) + '</p>' : '') +
+      (q.blank ?
+        '<div class="blank-row">' +
+          '<span>' + escapeHTML(q.blank.before) + '</span>' +
+          '<input type="text" id="word-' + q.key + '" placeholder="______" value="' + escapeHTML(answers[q.key + '_word'] || '') + '">' +
+          '<span>' + escapeHTML(q.blank.after) + '</span>' +
+        '</div>' : '') +
+      '<textarea id="ans-' + q.key + '" placeholder="' + escapeHTML(q.ph || '') + '">' + escapeHTML(answers[q.key] || '') + '</textarea>' +
+    '</div>').join('');
+
+  QUESTIONS.forEach(q=>{
+    $('ans-' + q.key).addEventListener('input', onInput);
+    if(q.blank) $('word-' + q.key).addEventListener('input', onInput);
+  });
+}
+function collect(){
+  QUESTIONS.forEach(q=>{
+    const t = $('ans-' + q.key);
+    if(t) answers[q.key] = t.value;
+    if(q.blank){
+      const w = $('word-' + q.key);
+      if(w) answers[q.key + '_word'] = w.value;
+    }
+  });
+}
+function filledCount(){
+  return QUESTIONS.filter(q=> (answers[q.key] || '').trim()).length;
+}
+
+/* ── 자동 저장: 3초 쉬면 서버로 ── */
+let saveTimer = null;
+function onInput(){
+  collect();
+  saveLocal();
+  setSaveState('typing');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=> pushCloud(false), 3000);
+}
+function setSaveState(kind){
+  const map = {typing:'✏️ 쓰는 중...', saving:'☁️ 저장 중...', saved:'☁️ 저장됨', error:'⚠️ 저장 실패 — 잠시 뒤 다시 시도할게요'};
+  $('saveState').textContent = map[kind] || '';
+}
+async function pushCloud(isSubmit){
+  if(!myKey) return false;
+  collect();
+  saveLocal();
+  setSaveState('saving');
+  const payload = {
+    studentNo: myNo,
+    studentName: myName,
+    answers: answers,
+    filled: filledCount(),
+    total: QUESTIONS.length,
+    updatedAt: Date.now()
+  };
+  if(isSubmit){
+    submittedAt = Date.now();
+    payload.submittedAt = submittedAt;
+    saveLocal();
+  }
+  try{
+    await db.collection(COLLECTION).doc(myKey).set(payload, {merge: true});
+    setSaveState('saved');
+    return true;
+  }catch(e){
+    console.error(e);
+    setSaveState('error');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=> pushCloud(false), 20000);  // 20초 뒤 자동 재시도
+    return false;
+  }
+}
+
+/* ── 제출 ── */
+$('submitBtn').addEventListener('click', async ()=>{
+  collect();
+  const empty = QUESTIONS.filter(q=> !(answers[q.key] || '').trim());
+  if(empty.length){
+    const nums = [];
+    QUESTIONS.forEach((q, i)=>{ if(!(answers[q.key] || '').trim()) nums.push(i + 1); });
+    toast(nums.join(', ') + '번 질문이 아직 비어 있어요');
+    const first = $('ans-' + empty[0].key);
+    if(first){ first.focus(); first.scrollIntoView({block:'center', behavior:'smooth'}); }
+    return;
+  }
+  const btn = $('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '제출하는 중이에요...';
+  const ok = await pushCloud(true);
+  btn.disabled = false;
+  btn.textContent = '📮 기록 제출하기';
+  if(!ok){ toast('서버에 저장하지 못했어요. 인터넷을 확인하고 다시 눌러주세요'); return; }
+  showDone();
+  toast('기록을 제출했어요');
+});
+$('editBtn').addEventListener('click', ()=>{
+  renderQuestions();
+  goTo('write');
+});
+
+function showDone(){
+  $('doneWhen').textContent = submittedAt ? '제출 시각 · ' + fmtTime(submittedAt) : '';
+  $('doneBody').innerHTML = QUESTIONS.map((q, i)=>{
+    const a = (answers[q.key] || '').trim();
+    const w = (answers[q.key + '_word'] || '').trim();
+    return '<div class="ans-block">' +
+      '<div class="h">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
+      (q.blank && w ? '<div class="word">' + escapeHTML(q.blank.before) + ' ' + escapeHTML(w) + ' ' + escapeHTML(q.blank.after) + '</div><br>' : '') +
+      '<div class="a' + (a ? '' : ' blank') + '">' + (a ? escapeHTML(a) : '(빈칸)') + '</div>' +
+    '</div>';
+  }).join('');
+  goTo('done');
+}
+
+/* 쓰던 중에 창을 닫아도 이 기기에는 남게 */
+window.addEventListener('beforeunload', ()=>{
+  if(!myKey) return;
+  collect();
+  saveLocal();
+});
+
+/* 허브나 다른 몬스터 사이트에서 로그인해뒀으면 바로 입장 */
+(function autoLogin(){
+  const v = readSharedLogin();
+  if(!v) return;
+  $('loginNo').value = v.no;
+  $('loginName').value = v.name;
+  login(true);
+})();
+</script>
+</body>
+</html>
