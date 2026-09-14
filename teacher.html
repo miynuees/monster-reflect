@@ -169,7 +169,7 @@ button,input{font-family:inherit}
 .ans-card .sub-h.ai{color:var(--mint-dark)}
 .ans-card .sub-h.me{color:var(--pink-dark)}
 .ans-card .a.sent{font-weight:700}
-.ans-card .a.sent b{color:var(--violet-dark);border-bottom:2px solid var(--violet-2);padding:0 5px}
+.ans-card .a.sent b{color:var(--violet-dark);border-bottom:2px solid var(--violet-2)}
 
 .empty{
   text-align:center;color:var(--sub);font-size:13px;font-weight:600;
@@ -213,7 +213,7 @@ button,input{font-family:inherit}
 .pdf-ans .sub-h.ai{color:#0EA790}
 .pdf-ans .sub-h.me{color:#C2557F}
 .pdf-ans .a.sent{font-weight:700}
-.pdf-ans .a.sent b{color:#7440E0;border-bottom:2px solid #DCCBFA;padding:0 5px}
+.pdf-ans .a.sent b{color:#7440E0;border-bottom:2px solid #DCCBFA}
 .pdf-empty{text-align:center;color:#6E6482;font-size:13px;font-weight:600;padding:22px;border:2px dashed #2B2140;border-radius:14px}
 </style>
 </head>
@@ -222,7 +222,7 @@ button,input{font-family:inherit}
 
   <div class="header">
     <h1 class="title-font">🔬 마무리 성찰 — 선생님 페이지</h1>
-    <p class="sub">학생들이 활동을 마치고 쓴 성찰 기록을 한눈에 모아 볼 수 있어요.</p>
+    <p class="sub">학생들이 쓴 성찰을 모아 보고, <b>몬스터 제작 과정 + 성찰</b>을 PDF 한 파일로 받을 수 있어요.</p>
   </div>
 
   <!-- 비밀번호 -->
@@ -248,7 +248,7 @@ button,input{font-family:inherit}
       <span class="count-pill" id="countPill">0명</span>
       <button class="btn-sm" id="expandBtn">📂 전체 펼치기</button>
       <button class="btn-sm" id="refreshBtn">🔄 새로고침</button>
-      <button class="btn-sm violet" id="exportAllBtn">📄 목록 전체 PDF 저장</button>
+      <button class="btn-sm violet" id="exportAllBtn">📄 목록 전체 PDF 저장 (활동+성찰)</button>
     </div>
     <div class="toolbar" style="margin-bottom:8px">
       <button class="filter-chip on" data-cf="all">전체</button>
@@ -258,7 +258,7 @@ button,input{font-family:inherit}
       <button class="filter-chip" data-cf="notdone">미제출만</button>
     </div>
     <p class="hint" id="hintText" style="font-size:11.5px;color:var(--sub);margin:0 0 14px;line-height:1.6">
-      💡 줄을 누르면 학생이 쓴 성찰이 몬스터 그림과 함께 펼쳐져요. 분반은 도감 선생님 페이지에서 지정한 값을 그대로 씁니다.
+      💡 줄을 누르면 학생이 쓴 성찰이 몬스터 그림과 함께 펼쳐져요. 📄 버튼으로 저장하는 PDF에는 <b>도감의 제작 과정(설정·프롬프트·소환 시도 그림)이 먼저 나오고, 이어서 마무리 성찰</b>이 붙습니다. 분반은 도감 선생님 페이지에서 지정한 값을 그대로 씁니다.
     </p>
     <div id="listBody"></div>
   </section>
@@ -344,9 +344,9 @@ const QUESTIONS = [
     title: '한 문장으로 정리하기',
     hint: '',
     sentence: [
-      {t: '"나에게 AI란'},
+      {t: '"나에게 AI란 '},
       {key: 'ai_is', w: 'short'},
-      {t: '이다. 왜냐하면'},
+      {t: ' 이다. 왜냐하면 '},
       {key: 'ai_why', w: 'long'},
       {t: '."'}
     ]
@@ -356,6 +356,10 @@ const QUESTIONS = [
 
 const PASSWORD = '0615';
 const CLASS_LABELS = {1:'A반', 2:'E반'};
+/* 몬스터 도감 쪽 값 (PDF에 활동 과정을 그대로 싣기 위해 도감 선생님 페이지와 동일하게 맞춤) */
+const STAGE_LABELS = ['몬스터 구상','소환'];
+const FIELD_KEYS = ['name','background','habitat','personality','ability','trait','appearance','extra'];
+const FIELD_TITLES = {name:'이름',background:'등장 배경',habitat:'서식지',personality:'성격',ability:'능력',trait:'특징',appearance:'외적 특징',extra:'기타'};
 const MISSING_IMAGE = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#EDEAF7"/><text x="200" y="200" text-anchor="middle" font-size="20" fill="#6E6482" font-family="sans-serif">그림 없음</text></svg>');
 
 firebase.initializeApp({
@@ -531,7 +535,7 @@ function renderList(){
       classBadge(s.id) +
       stateBadge(s) +
       '<span class="meta" title="마지막 저장 시각">' + fmtTime(last) + '</span>' +
-      '<button class="ibtn" data-act="pdf" title="이 학생만 PDF 저장">📄</button>' +
+      '<button class="ibtn" data-act="pdf" title="이 학생의 활동 과정 + 성찰 PDF 저장">📄</button>' +
     '</div>' +
     '<div class="detail" id="detail-' + escapeHTML(s.id) + '" style="display:' + (isOpen ? 'block' : 'none') + '"></div>';
   }).join('');
@@ -545,20 +549,36 @@ function renderList(){
   list.forEach(s=>{ if(openIds.has(s.id)) fillDetail(s.id); });
 }
 
-/* ── 몬스터 그림: 펼칠 때만 불러옴 (용량이 커서) ── */
-async function getImage(id){
-  if(imageCache[id] !== undefined) return imageCache[id];
+/* ── 몬스터 그림: 펼치거나 PDF를 만들 때만 불러옴 (용량이 커서) ── */
+async function getImages(id){
+  if(imageCache[id]) return imageCache[id];
+  const images = {};
+  try{
+    const snap = await db.collection('monsterDex').doc(id).collection('images').get();
+    snap.forEach(function(d){ images[d.id] = (d.data() || {}).data || ''; });
+  }catch(e){ console.error(e); }
+  imageCache[id] = images;
+  return images;
+}
+/* 도감 학생 페이지와 같은 방식으로 단계 재구성 (시도 목록 + 최종 선택) */
+function buildStages(data, images){
+  return (data.stages || []).map(function(meta, i){
+    const attempts = [];
+    for(let j = 0; j < (meta.attemptCount || 0); j++){
+      attempts.push(images['s' + i + '_a' + j] || MISSING_IMAGE);
+    }
+    const picked = (meta.pickedIndex !== undefined && meta.pickedIndex !== null) ? meta.pickedIndex : attempts.length - 1;
+    return Object.assign({}, meta, {attempts: attempts, pickedIndex: picked});
+  });
+}
+/* 목록에서 펼쳤을 때 보여줄 썸네일: 마지막 단계에서 고른 그림 */
+async function getThumb(id){
   const s = studentById[id];
   const stages = (s && s.dex && s.dex.stages) || [];
-  if(!stages.length){ imageCache[id] = MISSING_IMAGE; return MISSING_IMAGE; }
-  const stageIdx = stages.length - 1;
-  const meta = stages[stageIdx] || {};
-  const picked = (meta.pickedIndex !== undefined && meta.pickedIndex !== null) ? meta.pickedIndex : (meta.attemptCount || 1) - 1;
-  try{
-    const doc = await db.collection('monsterDex').doc(id).collection('images').doc('s' + stageIdx + '_a' + picked).get();
-    imageCache[id] = doc.exists ? ((doc.data() || {}).data || MISSING_IMAGE) : MISSING_IMAGE;
-  }catch(e){ console.error(e); imageCache[id] = MISSING_IMAGE; }
-  return imageCache[id];
+  if(!stages.length) return MISSING_IMAGE;
+  const built = buildStages(s.dex, await getImages(id));
+  const last = built[built.length - 1];
+  return (last && last.attempts[last.pickedIndex]) || MISSING_IMAGE;
 }
 
 function toggleDetail(id){
@@ -617,7 +637,7 @@ async function fillDetail(id){
       '</div>' +
     '</div>' +
     (st === 'none' ? '<div class="empty" style="padding:16px">아직 이 학생이 쓴 성찰이 없어요.</div>' : answerCards(s, 'ans-card'));
-  const img = await getImage(id);
+  const img = await getThumb(id);
   const el = $('thumb-' + id);
   if(el) el.src = img;
 }
@@ -670,34 +690,87 @@ async function ensurePdfLibs(){
 function cleanName(s){ return String(s || '').trim().replace(/[^\w가-힣]/g,''); }
 function todayLabel(){ return new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'long', day:'numeric'}); }
 
-async function buildBlocks(id){
+/* ── 앞부분: 몬스터 도감 활동 과정 (도감 선생님 페이지의 PDF와 같은 레이아웃) ── */
+function pdfFieldDetailHTML(fields){
+  return FIELD_KEYS.filter(function(k){ return k !== 'extra' || (fields[k] || '').trim(); })
+    .map(function(k){
+      return '<div style="display:flex;gap:12px;padding:7px 2px;border-bottom:1px solid #EDEAF7;font-size:13px;line-height:1.6">' +
+        '<b style="flex:none;width:80px;color:#7440E0">' + FIELD_TITLES[k] + '</b>' +
+        '<span style="flex:1">' + escapeHTML(fields[k] || '') + '</span></div>';
+    }).join('');
+}
+function pdfPromptBoxHTML(stage){
+  if(!stage.prompt) return '';
+  return '<div style="margin-top:16px">' +
+    '<div style="font-size:12px;font-weight:800;color:#0EA790;margin-bottom:6px">🤖 AI에게 보낸 프롬프트</div>' +
+    '<div style="white-space:pre-wrap;font-size:10.5px;line-height:1.65;color:#4A4160;background:#F7F5FF;border:1.5px solid #E3DEF7;border-radius:10px;padding:12px 14px">' + escapeHTML(stage.prompt) + '</div>' +
+  '</div>';
+}
+function pdfAttemptsHTML(stage){
+  const w = stage.attempts.length > 2 ? 150 : (stage.attempts.length === 2 ? 200 : 260);
+  return '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;justify-content:center">' +
+    stage.attempts.map(function(img, a){
+      const picked = a === stage.pickedIndex;
+      return '<figure style="margin:0;text-align:center">' +
+        '<img src="' + img + '" style="width:' + w + 'px;border-radius:12px;border:3px solid ' + (picked ? '#17C9AE' : '#E3DEF7') + '">' +
+        '<figcaption style="font-size:11px;color:#6E6482;margin-top:4px">' + (a+1) + '번째 시도' + (picked ? ' · 최종 선택' : '') + '</figcaption>' +
+      '</figure>';
+    }).join('') + '</div>';
+}
+function pdfStageSectionHTML(stage, i){
+  const note = function(bg, color, label, text, pre){
+    return '<p style="background:' + bg + ';color:#2B2140;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.7;margin:0 0 10px' + (pre ? ';white-space:pre-wrap' : '') + '">' +
+      '<b style="color:' + color + '">' + label + '</b> ' + escapeHTML(text) + '</p>';
+  };
+  return '<h2 style="font-family:\'Black Han Sans\',sans-serif;font-weight:400;font-size:19px;margin:0 0 12px;padding-bottom:8px;border-bottom:2.5px solid #2B2140">' + (i+1) + '. ' + (STAGE_LABELS[i] || '단계') + '</h2>' +
+    (stage.keepNote ? note('#E1FBF5', '#0EA790', '그대로 살릴 점', stage.keepNote) : '') +
+    (stage.fixNote ? note('#E1FBF5', '#0EA790', '고칠 점', stage.fixNote) : '') +
+    (stage.worldbuilding ? note('#E1FBF5', '#0EA790', '확장된 세계관', stage.worldbuilding, true) : '') +
+    (stage.changeNote ? note('#F1E9FF', '#7440E0', '시각적 번역', stage.changeNote) : '') +
+    (i === 0 ? '<div style="margin:0 0 4px">' + pdfFieldDetailHTML(stage.fields || {}) + '</div>' : '') +
+    pdfPromptBoxHTML(stage) +
+    pdfAttemptsHTML(stage);
+}
+function pdfHeaderHTML(s){
+  const d = s.dex || {};
+  const cls = CLASS_LABELS[classMap[s.id]] ? ' · ' + CLASS_LABELS[classMap[s.id]] : '';
+  return '<h1 style="font-family:\'Black Han Sans\',sans-serif;font-weight:400;font-size:26px;margin:0 0 6px">' + escapeHTML(monsterName(s)) + '의 활동 기록</h1>' +
+    '<p style="color:#6E6482;font-size:12px;margin:0 0 24px">학번 ' + escapeHTML(d.studentNo || '-') + ' · 이름 ' + escapeHTML(d.studentName || '-') + cls + ' · 저장 ' + new Date().toLocaleString('ko-KR') + '</p>';
+}
+function buildDexPages(holder, s, stages){
+  stages.forEach(function(stage, i){
+    const page = document.createElement('div');
+    page.style.cssText = "width:794px;min-height:1123px;background:#fff;color:#2B2140;font-family:'Noto Sans KR',sans-serif;padding:48px 54px;box-sizing:border-box;";
+    page.innerHTML = (i === 0 ? pdfHeaderHTML(s) : '') + pdfStageSectionHTML(stage, i);
+    holder.appendChild(page);
+  });
+}
+
+/* ── 뒷부분: 마무리 성찰 ── */
+function reflectBlocks(id){
   const s = studentById[id];
-  const who = escapeHTML(s.dex.studentNo || '-') + ' ' + escapeHTML(s.dex.studentName || '');
+  const d = s.dex || {};
+  const who = escapeHTML(d.studentNo || '-') + ' ' + escapeHTML(d.studentName || '');
   const cls = CLASS_LABELS[classMap[id]] ? ' · ' + CLASS_LABELS[classMap[id]] : '';
   const when = (s.ref && s.ref.submittedAt) ? '제출 ' + fmtTime(s.ref.submittedAt)
              : (s.ref && s.ref.updatedAt) ? '작성 중 · 마지막 저장 ' + fmtTime(s.ref.updatedAt) : '기록 없음';
-  const img = await getImage(id);
-  const blocks = [];
-  blocks.push(
+  const blocks = [
     '<div class="pdf-title">' +
-      '<h1>📓 ' + who + '의 마무리 성찰</h1>' +
-      '<p>' + escapeHTML(monsterName(s)) + cls + ' · ' + escapeHTML(when) + ' · ' + todayLabel() + '</p>' +
-    '</div>' +
-    '<div class="pdf-head">' +
-      '<img src="' + img + '" alt="">' +
-      '<div class="pdf-side"><div class="h">🐾 이 학생이 만든 생명체</div><div class="l">' + escapeHTML(monsterName(s)) + '<br>' + who + cls + '</div></div>' +
-    '</div>');
+      '<h1>📓 마무리 성찰</h1>' +
+      '<p>' + who + cls + ' · ' + escapeHTML(monsterName(s)) + ' · ' + escapeHTML(when) + '</p>' +
+    '</div>'
+  ];
   if(stateOf(s) === 'none'){
     blocks.push('<div class="pdf-empty">아직 이 학생이 쓴 성찰이 없어요.</div>');
-  }else{
-    const a = answersOf(s);
-    QUESTIONS.forEach(function(q, i){
-      blocks.push('<div class="pdf-ans">' +
-        '<div class="qh">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
-        answerBody(q, a) +
-      '</div>');
-    });
+    return blocks;
   }
+  const a = answersOf(s);
+  QUESTIONS.forEach(function(q, i){
+    blocks.push('<div class="pdf-ans">' +
+      '<div class="qh">' + q.icon + ' 질문 ' + (i + 1) + ' · ' + escapeHTML(q.title) + '</div>' +
+      answerBody(q, a) +
+    '</div>');
+  });
   return blocks;
 }
 
@@ -746,14 +819,20 @@ async function renderPagesToPdf(pdf, pages, firstPage){
 }
 
 async function renderStudentToPdf(pdf, id, first){
+  const s = studentById[id];
   const holder = document.createElement('div');
   holder.className = 'pdf-holder';
   document.body.appendChild(holder);
   try{
-    const blocks = await buildBlocks(id);
-    const pages = paginate(holder, blocks, whoLabel(studentById[id]));
-    await new Promise(r=> setTimeout(r, 120));
-    await renderPagesToPdf(pdf, pages, first);
+    // 1) 몬스터 도감 활동 과정 (도감 선생님 페이지 PDF와 같은 내용)
+    if(((s.dex && s.dex.stages) || []).length){
+      const stages = buildStages(s.dex, await getImages(id));
+      buildDexPages(holder, s, stages);
+    }
+    // 2) 이어서 마무리 성찰
+    paginate(holder, reflectBlocks(id), whoLabel(s));
+    await new Promise(r=> setTimeout(r, 150));
+    await renderPagesToPdf(pdf, Array.from(holder.children), first);
   }finally{
     holder.remove();
   }
@@ -769,7 +848,7 @@ async function exportOne(id){
     await ensurePdfLibs();
     const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
     await renderStudentToPdf(pdf, id, true);
-    pdf.save(cleanName(s.dex.studentNo) + '_' + cleanName(s.dex.studentName) + '_마무리성찰.pdf');
+    pdf.save(cleanName(s.dex.studentNo) + '_' + cleanName(s.dex.studentName) + '_활동기록+성찰.pdf');
     toast('PDF로 저장했어요');
   }catch(e){
     console.error(e);
@@ -781,9 +860,11 @@ async function exportOne(id){
 
 $('exportAllBtn').addEventListener('click', async ()=>{
   if(busy){ toast('지금 다른 PDF를 만드는 중이에요'); return; }
-  const list = filteredStudents().filter(s=> stateOf(s) !== 'none');
-  if(list.length === 0){ toast('PDF로 만들 성찰 기록이 없어요'); return; }
-  if(!confirm('지금 목록에서 성찰을 쓴 ' + list.length + '명을 PDF 한 파일로 저장할까요?\n(학생 수가 많으면 몇 분 걸릴 수 있어요)')) return;
+  const list = filteredStudents().filter(function(s){
+    return stateOf(s) !== 'none' || ((s.dex && s.dex.stages) || []).length > 0;
+  });
+  if(list.length === 0){ toast('PDF로 만들 기록이 없어요'); return; }
+  if(!confirm('지금 목록에서 기록이 있는 ' + list.length + '명의 활동 과정 + 성찰을 PDF 한 파일로 저장할까요?\n(그림이 많아서, 학생 수가 많으면 몇 분 걸릴 수 있어요)')) return;
 
   busy = true;
   const btn = $('exportAllBtn');
@@ -799,7 +880,7 @@ $('exportAllBtn').addEventListener('click', async ()=>{
     const today = new Date().toISOString().slice(0,10);
     const q = $('searchInput').value.trim();
     const cfLabel = classFilter === '1' ? '_A반' : classFilter === '2' ? '_E반' : classFilter === 'none' ? '_분반미지정' : '';
-    pdf.save('마무리성찰' + cfLabel + (q ? '_' + cleanName(q) : '') + '_' + today + '.pdf');
+    pdf.save('몬스터도감_활동기록+성찰' + cfLabel + (q ? '_' + cleanName(q) : '') + '_' + today + '.pdf');
     toast(list.length + '명의 기록을 PDF 한 파일로 저장했어요');
   }catch(e){
     console.error(e);
